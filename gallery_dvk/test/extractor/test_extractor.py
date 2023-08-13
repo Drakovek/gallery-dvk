@@ -101,6 +101,7 @@ def test_download_from_url():
         assert extractor.download_from_url("http://www.thing.txt/view/next/", "thing")
         assert extractor.download_from_url("http://www.thing.txt/user/next/", "other")
         assert extractor.download_from_url("thing.txt/view/blah", "final")
+        assert extractor.attempted_login
 
 def test_get_info_from_config():
     """
@@ -112,6 +113,9 @@ def test_get_info_from_config():
         assert extractor.archive_connection is None
         assert not extractor.write_metadata
         assert extractor.include == []
+        assert extractor.username is None
+        assert extractor.password is None
+        assert not extractor.attempted_login
     # Test getting the archive_file from the config file
     temp_dir = mm_file_tools.get_temp_dir()
     config_file = abspath(join(temp_dir, "config.json"))
@@ -132,6 +136,12 @@ def test_get_info_from_config():
     mm_file_tools.write_json_file(config_file, config)
     with Extractor("thing", [config_file]) as extractor:
         assert extractor.include == ["gallery", "scraps"]
+    # Test getting the username and password variables
+    config = {"thing":{"username":"Person", "password":"other"}}
+    mm_file_tools.write_json_file(config_file, config)
+    with Extractor("thing", [config_file]) as extractor:
+        assert extractor.username == "Person"
+        assert extractor.password == "other"
     # Test if the category is invalid
     with Extractor("different", [config_file]) as extractor:
         assert extractor.archive_file is None

@@ -279,3 +279,68 @@ def test_download_page():
         assert transfur.archive_contains("transfur-mxmaramoose-27317-2")
         assert transfur.archive_contains("transfur-oter-17614-1")
         assert not transfur.archive_contains("transfur-nonexist-12345")
+
+def test_with_login():
+    """
+    Tests getting info from Transfur pages that are unavailable when not logged in.
+    Requires a user config file with Transfur username and password to pass.
+    """
+    temp_dir = mm_file_tools.get_temp_dir()
+    archive_file = abspath(join(temp_dir, "transfur.db"))
+    with Transfur() as transfur:
+        # Nullify archive_file so user archive isn't overwritten
+        try:
+            transfur.archive_connection.close()
+        except AttributeError: pass
+        transfur.archive_file = archive_file
+        transfur.open_archive()
+        transfur.write_metadata = True
+        # Test logging in
+        if transfur.username is None or transfur.password is None:
+            raise Exception("Transfur Username and Password must be provided in a user config file to perform this test.")
+        assert transfur.login(transfur.username, transfur.password)
+        assert transfur.attempted_login
+        # Test getting links from gallery that are not shown unless logged in
+        base = "https://www.transfur.com/users/"
+        links = transfur.get_links_from_gallery(f"{base}danwolf/Gallery")
+        assert {"section":"danwolf/submissions/27823", "num_images":1} in links
+        assert {"section":"danwolf/submissions/26904", "num_images":1} in links
+        assert {"section":"danwolf/submissions/25295", "num_images":1} in links
+        # Test getting info from page that is locked when not logged in
+        pages = transfur.get_info_from_page("Danwolf/Submissions/26719")
+        assert len(pages) == 1
+        assert pages[0]["title"] == "Digimon beast"
+        assert pages[0]["artist"] == "Danwolf"
+        assert pages[0]["date"] == "2021-05-01"
+        assert pages[0]["url"] == f"{base}danwolf/submissions/26719"
+        assert pages[0]["image_url"] == f"{base}danwolf/images/resizerimage1280x1810.jpg"
+        assert pages[0]["tags"] == ["Big", "Digimon", "Muscular", "Shapeshifter",
+                "Traditional", "Werecreature", "Weregarurumon", "Wolf"]
+        assert pages[0]["views"] > 854
+        assert pages[0]["views"] < 950
+        assert pages[0]["favorites"] > 25
+        assert pages[0]["favorites"] < 35
+        description = "<p>Foxlightning wanted his a beefy version of his favorite boi ! "\
+                +"Wish granted &gt;:3</p>"
+        assert pages[0]["description"] == description
+        assert pages[0]["total_images"] == 1
+        assert pages[0]["id"] == "26719-1"
+        # Test downloading page that is locked when not logged in
+        json = {"title":"Digimon beast"}
+        json["artist"] = "Danwolf"
+        json["url"] = f"{base}danwolf/submissions/26719"
+        json["image_url"] = f"{base}danwolf/images/resizerimage1280x1810.jpg"
+        media_file = transfur.download_page(json, temp_dir)
+        assert basename(media_file) == "Digimon beast.jpg"
+        assert exists(media_file)
+        parent_folder = abspath(join(temp_dir, "Transfur"))
+        artist_folder = abspath(join(parent_folder, "Danwolf"))
+        assert exists(artist_folder)
+        json_file = abspath(join(artist_folder, "Digimon beast.json"))
+        assert exists(json_file)
+        meta = mm_file_tools.read_json_file(json_file)
+        assert meta["title"] == "Digimon beast"
+        assert meta["artist"] == "Danwolf"
+        assert meta["url"] == f"{base}danwolf/submissions/26719"
+        assert meta["image_url"] == f"{base}danwolf/images/resizerimage1280x1810.jpg"
+        assert os.stat(media_file).st_size == 249183

@@ -23,7 +23,7 @@ def get_default_config_paths() -> List[str]:
         config_paths.append(r"%USERPROFILE%\gallery-dvk.json")
     else:
         # Linux/MacOS/Unix-based paths
-        config_paths.append(r"/etc/gallery-dvk.conf")
+        config_paths.append(r"/etc/gallery-dvk.json")
         config_paths.append(r"${HOME}/.config/gallery-dvk/config.json")
         config_paths.append(r"${HOME}/.gallery-dvk.json")
     # Replace the environment variables in paths

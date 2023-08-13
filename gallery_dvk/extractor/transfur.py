@@ -323,3 +323,38 @@ class Transfur(gallery_dvk.extractor.extractor.Extractor):
         """
         subs = ["Transfur", page["artist"]]
         return super().download_page(page, directory, subs)
+    
+    def login(self, username:str, password:str) -> bool:
+        """
+        Attempts to login the requests_session object to Transfur.com
+
+        :param username: Transfur username
+        :type username: str, required
+        :param password: Transfur password
+        :type password: str, required
+        :return: Whether login was successful
+        :rtype: bool
+        """
+        # Load the login page to get request verification cookies
+        bs = self.web_get("https://www.transfur.com/Account/SignIn")
+        input_element = bs.find("input", {"name":"__RequestVerificationToken"})
+        # Attempt login
+        request = {"__RequestVerificationToken":input_element["value"]}
+        request["UsernameOrEmail"] = username
+        request["Password"] = password
+        headers = {"Content-Type":"application/x-www-form-urlencoded"}
+        response = self.requests_session.post("https://www.transfur.com/Account/SignIn", headers=headers, data=request)
+        # Move to main Transfur page
+        self.cookies_to_header()
+        bs = self.web_get("https://transfur.com/")
+        # Check whether login was successful
+        member_links = bs.find("div", {"class":"memberLinks"})
+        menu_header = member_links.find("a", {"class":"menuHeader"})
+        self.attempted_login = True
+        return menu_header is not None
+    
+    def user_login(self) -> bool:
+        """
+        Asks user for Transfur.com login information before attempting login.
+        """
+        super().user_login("Transfur")

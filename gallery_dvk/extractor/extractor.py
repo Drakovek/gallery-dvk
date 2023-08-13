@@ -92,6 +92,8 @@ class Extractor:
         # Load the config file
         config = gallery_dvk.config.get_config(config_paths)
         self.get_info_from_config(config, category)
+        # Set the extractor so that login has not been attempted
+        self.attempted_login = False
     
     def __enter__(self):
         """
@@ -157,6 +159,7 @@ class Extractor:
         match = self.match_url(url)
         if match is None:
             return False
+        self.user_login()
         return getattr(self, "download_" + match["type"])(match["section"], abspath(directory))
     
     def download_submission(self, section:str, directory:str) -> bool:
@@ -192,6 +195,14 @@ class Extractor:
         try:
             self.include = config[category]["include"]
         except KeyError: self.include = []
+        # Get the site username
+        try:
+            self.username = config[category]["username"]
+        except KeyError: self.username = None
+        # Get the site password
+        try:
+            self.password = config[category]["password"]
+        except KeyError: self.password = None
             
     
     def open_archive(self):
@@ -392,3 +403,45 @@ class Extractor:
         # Add identifier to the database
         self.add_to_archive(identifier)
         return image_file
+    
+    def login(self, username:str, password:str) -> bool:
+        """
+        Attempts to login the requests_session object to a website.
+        Stand-in method to be overwritten
+
+        :param username: Username
+        :type username: str, required
+        :param password: Password
+        :type password: str, required
+        :return: Whether login was successful
+        :rtype: bool
+        """
+        self.attempted_login = True
+        return True
+    
+    def user_login(self, site:str=None) -> bool:
+        """
+        Asks user for login information before attempting login.
+        
+        :param site: Site that is being logged in to, defaults to None
+        :type site: str, optional
+        :return: Whether the login was successful
+        :rtype: bool
+        """
+        if site is not None and not self.attempted_login:
+            self.attempted_login = True
+            # Get the username and password from the config file
+            username = self.username
+            password = self.password
+            # Get the username and password from the user if not already configured
+            if username is None:
+                username = input("{site} Username: ")
+            if password is None:
+                password = getpass.getpass("{site} Password: ")
+            # Attempt login
+            logged_in = self.login(username, password)
+            username = None
+            password = None
+            return logged_in
+        self.attempted_login = True
+        return False
