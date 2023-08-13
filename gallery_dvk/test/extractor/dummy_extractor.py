@@ -34,4 +34,4 @@ class DummyExtractor(gallery_dvk.extractor.extractor.Extractor):
         """
         page = {"title":"Test Title!", "url":section}
         self.download_page(page, directory)
-        return True        
+        return True

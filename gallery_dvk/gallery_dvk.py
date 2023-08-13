@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 import os
+import re
 import argparse
 import python_print_tools.printer
+import metadata_magic.file_tools as mm_file_tools
 from gallery_dvk.extractor.transfur import Transfur
 from os.path import abspath, exists
 
@@ -45,6 +47,36 @@ class GalleryDVK():
                 return True
         python_print_tools.printer.color_print(f"Unsupported URL: {url}", "r")
         return False
+    
+    def download_from_file(self, file:str, directory:str):
+        """
+        Attepts to download media from URLs in a given text file.
+        
+        :param file: Path of file to read URLs from
+        :type file: str, required
+        :param directory: Directory to save into
+        :type directory: str, required
+        :return: Whether the download completed successfully
+        :rtype: bool
+        """
+        try:
+            # Get lines from the text file
+            lines = []
+            text = mm_file_tools.read_text_file(file)
+            split = text.split("\n")
+            for item in split:
+                lines.extend(item.split("\r"))
+        except AttributeError:
+            return False
+        # Remove whitespace and empty lines from the list of lines
+        for i in range(len(lines)-1, -1, -1):
+            lines[i] = re.sub(r"^\s+|\s+$", "", lines[i])
+            if lines[i] == "":
+                del lines[i]
+        # Download URLs
+        for line in lines:
+            self.download_from_url(line, directory)
+        return True
 
 def main():
     """
@@ -54,7 +86,9 @@ def main():
     parser.add_argument(
         "URL",
         help="URL to download.",
-        type=str)
+        nargs="?",
+        type=str,
+        default=None)
     parser.add_argument(
         "-d",
         "--directory",
@@ -62,10 +96,27 @@ def main():
         nargs="?",
         type=str,
         default=str(os.getcwd()))
+    parser.add_argument(
+        "-i",
+        "--input-file",
+        metavar="FILE",
+        help=("Download URLs found in FILE"),
+        type=str,
+        default=None)
     args = parser.parse_args()
     full_directory = abspath(args.directory)
     if not exists(full_directory):
+        # Directory is invalid
         python_print_tools.printer.color_print("Invalid directory", "r")
     else:
-        with GalleryDVK() as dvk:
-            dvk.download_from_url(args.URL, full_directory)
+        if args.URL is None and args.input_file is None:
+            # No URLs provided
+            python_print_tools.printer.color_print("Either URL or FILE containing urls is required.", "r")
+            print(r"Use 'gallery-dvk --help' to get a list of all options.")
+        else:
+            # Download either from file or URL
+            with GalleryDVK() as dvk:
+                if args.input_file is None:
+                    dvk.download_from_url(args.URL, full_directory)
+                else:
+                    dvk.download_from_file(abspath(args.input_file), full_directory)
