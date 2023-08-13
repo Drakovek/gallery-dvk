@@ -7,6 +7,7 @@ import bs4
 import time
 import shutil
 import urllib
+import getpass
 import sqlite3
 import requests
 import gallery_dvk.config
@@ -435,9 +436,9 @@ class Extractor:
             password = self.password
             # Get the username and password from the user if not already configured
             if username is None:
-                username = input("{site} Username: ")
+                username = input(f"{site} Username: ")
             if password is None:
-                password = getpass.getpass("{site} Password: ")
+                password = getpass.getpass(f"{site} Password: ")
             # Attempt login
             logged_in = self.login(username, password)
             username = None

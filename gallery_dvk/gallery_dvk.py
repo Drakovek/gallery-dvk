@@ -74,8 +74,9 @@ class GalleryDVK():
             if lines[i] == "":
                 del lines[i]
         # Download URLs
-        for line in lines:
-            self.download_from_url(line, directory)
+        for i in range(0, len(lines)):
+            print(f"[{i+1}/{len(lines)}] {lines[i]}")
+            self.download_from_url(lines[i], directory)
         return True
 
 def main():
