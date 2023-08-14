@@ -18,8 +18,46 @@ import metadata_magic.rename.rename_tools as mm_rename_tools
 from os.path import abspath, exists, join
 from typing import List
 
-def get_page(url:str) -> bool:
-    return True
+def get_filename_from_page(page:dict, directory:str, filename_format:str="{title}") -> str:
+    """
+    Creates a filename based on contents of a given page, formatted to a given format.
+    Will append filename with a number if the given filename already exists in the given directory.
+    The file will follow the structure of filename_format.
+    Keys in curly brackets will be replaced with that key's value in the page
+    
+    :param page: Page to extract values from if necessary
+    :type page: dict, required
+    :param directory: Directory the file is destined for, used to check if filename already exists
+    :type directory: str, required
+    :param filename_format: How to format the filename
+    :type filename_format: str, required
+    :return: Filename for the page
+    :rtype: str
+    """
+    # Replace stand-in keys in the filename
+    filename = filename_format
+    keys = re.findall(r"(?<={)[^}]+(?=})", filename)
+    for key in keys:
+        try:
+            filename = filename.replace(f"{{{key}}}", page[key])
+        except KeyError: pass
+    filename = mm_rename_tools.create_filename(filename)
+    # Get the extension for the media type
+    try: extension = html_string_tools.html.get_extension(page["image_url"])
+    except KeyError:
+        try: extension = html_string_tools.html.get_extension(page["url"])
+        except KeyError: extension = ""
+    if extension == "":
+        extension = ".jpg"
+    # Append the with numbers if necessary
+    num = 2
+    base_filename = filename
+    while (exists(abspath(join(directory, f"{filename}{extension}")))
+                or exists(abspath(join(directory, f"{filename}.json")))):
+        filename = f"{base_filename}-{num}"
+        num += 1
+    # Return the filename
+    return filename
 
 def get_date(date_string:str, date_order:str=None) -> str:
     """
@@ -198,12 +236,16 @@ class Extractor:
         except KeyError: self.include = []
         # Get the site username
         try:
-            self.username = config[category]["username"]
+            self.username = str(config[category]["username"])
         except KeyError: self.username = None
         # Get the site password
         try:
-            self.password = config[category]["password"]
+            self.password = str(config[category]["password"])
         except KeyError: self.password = None
+        # Get the filename format for the site
+        try:
+            self.filename_format = str(config[category]["filename_format"])
+        except KeyError: self.filename_format = "{title}"
             
     
     def open_archive(self):
@@ -379,18 +421,19 @@ class Extractor:
             if not exists(full_directory):
                 os.mkdir(full_directory)
         # Get filename
+        filename = get_filename_from_page(page, directory, self.filename_format)
+        # Get media URL
         try:
-            image_url = page["image_url"]
+            media_url = page["image_url"]
         except KeyError:
-            image_url = page["url"]
-        filename = mm_rename_tools.get_available_filename(image_url, page["title"], full_directory)
-        # Download image
-        extension = html_string_tools.html.get_extension(filename)
+            media_url = page["url"]
+        # Download media
+        extension = html_string_tools.html.get_extension(media_url)
         if extension == "":
-            filename = f"{filename}.jpg"
-        image_file = abspath(join(full_directory, filename))
-        response = self.download(image_url, image_file)
-        assert exists(image_file)
+            extension = ".jpg"
+        media_file = abspath(join(full_directory, f"{filename}{extension}"))
+        response = self.download(media_url, media_file)
+        assert exists(media_file)
         python_print_tools.printer.color_print(page["url"], "g")
         # Add date if required
         updated_page = page
@@ -399,11 +442,11 @@ class Extractor:
             updated_page["date"] = get_date(response["Last-Modified"])
         # Write JSON file
         if self.write_metadata:
-            json_file = abspath(join(full_directory, filename[:len(filename) - len(extension)] + ".json"))
+            json_file = abspath(join(full_directory, f"{filename}.json"))
             mm_file_tools.write_json_file(json_file, updated_page)
         # Add identifier to the database
         self.add_to_archive(identifier)
-        return image_file
+        return media_file
     
     def login(self, username:str, password:str) -> bool:
         """

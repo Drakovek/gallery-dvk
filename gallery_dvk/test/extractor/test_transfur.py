@@ -151,6 +151,7 @@ def test_get_info_from_page():
         assert pages[0]["favorites"] > 114
         assert pages[0]["favorites"] < 120
         assert pages[0]["description"] == "<p>Auction piece for Truttle on FA.</p>"
+        assert pages[0]["image_number"] == 1
         assert pages[0]["total_images"] == 1
         assert pages[0]["id"] == "17614-1"
         # Test getting page with multiple images
@@ -171,16 +172,19 @@ def test_get_info_from_page():
         assert pages[0]["url"] == f"{base}mxmaramoose/submissions/27317"
         assert pages[0]["image_url"] == f"{base}mxmaramoose/images/lily%20full.png"
         assert pages[0]["id"] == "27317-1"
+        assert pages[0]["image_number"] == 1
+        assert pages[0]["total_images"] == 3
         assert pages[1]["title"] == "Unexpected Happiness"
         assert pages[1]["artist"] == "Mxmaramoose"
         assert pages[1]["url"] == f"{base}mxmaramoose/submissions/27317/2"
         assert pages[1]["image_url"] == f"{base}mxmaramoose/images/lily%20screensaver1.png"
+        assert pages[1]["image_number"] == 2
         assert pages[1]["id"] == "27317-2"
         assert pages[2]["title"] == "Unexpected Happiness"
         assert pages[2]["artist"] == "Mxmaramoose"
         assert pages[2]["url"] == f"{base}mxmaramoose/submissions/27317/3"
         assert pages[2]["image_url"] == f"{base}mxmaramoose/images/lily%20screensaver2.png"
-        assert pages[0]["total_images"] == 3
+        assert pages[2]["image_number"] == 3
         assert pages[2]["id"] == "27317-3"
         # Test trying to get mature content when not logged in
         assert transfur.get_info_from_page("Danwolf/Submissions/26719") == []
@@ -256,16 +260,17 @@ def test_download_page():
     # Test if file has not been written
     with Transfur([config_file]) as transfur:
         json = {"title":"Bear TF TG"}
+        json["id"] = "17614-1"
         json["artist"] = "Oter"
         json["url"] = f"{base}Oter/Submissions/17614"
         json["image_url"] = f"{base}oter/Images/bear%20tf%20tg%20final.jpg"
         media_file = transfur.download_page(json, temp_dir)
-        assert basename(media_file) == "Bear TF TG.jpg"
+        assert basename(media_file) == "17614-1_Bear TF TG.jpg"
         assert exists(media_file)
     parent_folder = abspath(join(temp_dir, "Transfur"))
     artist_folder = abspath(join(parent_folder, "Oter"))
     assert exists(artist_folder)
-    json_file = abspath(join(artist_folder, "Bear TF TG.json"))
+    json_file = abspath(join(artist_folder, "17614-1_Bear TF TG.json"))
     assert exists(json_file)
     meta = mm_file_tools.read_json_file(json_file)
     assert meta["title"] == "Bear TF TG"
@@ -323,20 +328,22 @@ def test_with_login():
         description = "<p>Foxlightning wanted his a beefy version of his favorite boi ! "\
                 +"Wish granted &gt;:3</p>"
         assert pages[0]["description"] == description
+        assert pages[0]["image_number"] == 1
         assert pages[0]["total_images"] == 1
         assert pages[0]["id"] == "26719-1"
         # Test downloading page that is locked when not logged in
         json = {"title":"Digimon beast"}
+        json["id"] = "26719-1"
         json["artist"] = "Danwolf"
         json["url"] = f"{base}danwolf/submissions/26719"
         json["image_url"] = f"{base}danwolf/images/resizerimage1280x1810.jpg"
         media_file = transfur.download_page(json, temp_dir)
-        assert basename(media_file) == "Digimon beast.jpg"
+        assert basename(media_file) == "26719-1_Digimon beast.jpg"
         assert exists(media_file)
         parent_folder = abspath(join(temp_dir, "Transfur"))
         artist_folder = abspath(join(parent_folder, "Danwolf"))
         assert exists(artist_folder)
-        json_file = abspath(join(artist_folder, "Digimon beast.json"))
+        json_file = abspath(join(artist_folder, "26719-1_Digimon beast.json"))
         assert exists(json_file)
         meta = mm_file_tools.read_json_file(json_file)
         assert meta["title"] == "Digimon beast"

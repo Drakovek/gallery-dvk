@@ -36,6 +36,9 @@ class Transfur(gallery_dvk.extractor.extractor.Extractor):
         # Set the default include values if necessary
         if self.include == []:
             self.include = ["gallery", "sketches"]
+        # Set the default filename format, if necessary
+        if self.filename_format == "{title}":
+            self.filename_format = "{id}_{title}"
     
     def download_submission(self, section:str, directory:str) -> bool:
         """
@@ -307,6 +310,8 @@ class Transfur(gallery_dvk.extractor.extractor.Extractor):
             # Get the submission id
             identifier = self.get_id(pages[i]["url"])
             pages[i]["id"] = re.findall("[0-9]+-[0-9]+$", identifier)[0]
+            # Get the page number
+            pages[i]["image_number"] = int(re.findall("[0-9]+$", identifier)[0])
         # Return pages
         return pages
     
