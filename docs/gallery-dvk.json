@@ -1,0 +1,11 @@
+{
+    "transfur":
+    {
+        "metadata": false,
+        "archive": null,
+        "username": null,
+        "password": null,
+        "include": ["gallery", "sketches"],
+        "filename_format": "{id}_{title}"
+    }
+}

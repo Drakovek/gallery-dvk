@@ -1,0 +1,22 @@
+{
+    "#": "List of all the extractors available",
+
+    "transfur":
+    {
+        "#": "Sets gallery-dvk to write JSON metadata for pages downloaded from Transfur.com",
+        "metadata": true,
+        
+        "#": "Sets the path to the download archive for Transfur",
+        "archive": "/path/to/archive.db",
+        
+        "#": "Sets the Username and Password for login to Transfur.com",
+        "username": "Example",
+        "password": "Pass1234",
+        
+        "#": "Overrides the default include values to include favorites when downloading from a Transfur user",
+        "include": ["gallery", "sketches", "favorites"],
+        
+        "#": "Overrides the default filename format to include the page date and ID",
+        "filename_format": "[{date}_{id}] {title}"
+    }
+}
