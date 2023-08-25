@@ -133,6 +133,11 @@ class DocsLab(gallery_dvk.extractor.extractor.Extractor):
             links.extend(submissions)
         if get_favorites:
             links.extend(favorites)
+        # Remove already downloaded links
+        for i in range(len(links)-1, -1, -1):
+            href = "docs-lab.com/submissions/" + links[i]["section"]
+            if self.archive_contains(self.get_id(href)):
+                del links[i]
         # Return links
         return links
     

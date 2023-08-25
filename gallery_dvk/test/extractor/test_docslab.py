@@ -158,7 +158,12 @@ def test_get_links_from_user():
     """
     Tests the get_links_from_user method.
     """
-    with DocsLab([]) as docslab:
+    temp_dir = mm_file_tools.get_temp_dir()
+    config_file = abspath(join(temp_dir, "config.json"))
+    archive_file = abspath(join(temp_dir, "docslab.db"))
+    config = {"docslab":{"archive":archive_file, "metadata":True}}
+    mm_file_tools.write_json_file(config_file, config)
+    with DocsLab([config_file]) as docslab:
         # Test getting submissions
         links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
         assert len(links) > 67
@@ -185,6 +190,18 @@ def test_get_links_from_user():
         assert {"section":"1649/you-and-your-beef", "rating":None} in links
         assert {"section":"3006/a-canadian-werewolf-in-philly", "rating":"X"} in links
         assert {"section":"4103/wooing-wilderness-and-wolves", "rating":"X"} in links
+        # Test not including already downloaded files
+        docslab.add_to_archive("docslab-3637")
+        docslab.add_to_archive("docslab-2917")
+        docslab.add_to_archive("docslab-2862")
+        links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
+        assert len(links) > 64
+        assert len(links) < 70
+        assert {"section":"3637/a-close-companion", "rating":"R"} not in links
+        assert {"section":"2917/comfort", "rating":"PG"} not in links
+        assert {"section":"2862/the-gift-ch-01", "rating":"X"} not in links
+        assert {"section":"3430/esssssential-oilsssss", "rating":"X"} in links
+        assert {"section":"3474/what-goes-around", "rating":"X"} in links
 
 def test_download_page():
     # Test if the ID is already in the archive
