@@ -5,6 +5,7 @@ import re
 import argparse
 import python_print_tools.printer
 import metadata_magic.file_tools as mm_file_tools
+from gallery_dvk.extractor.docslab import DocsLab
 from gallery_dvk.extractor.transfur import Transfur
 from os.path import abspath, exists
 
@@ -20,7 +21,7 @@ class GalleryDVK():
         Setup for when GallerDVK is opened.
         Create an object for each Extractor.
         """
-        self.extractors = [Transfur()]
+        self.extractors = [DocsLab(), Transfur()]
         return self
         
     def __exit__(self, *args):

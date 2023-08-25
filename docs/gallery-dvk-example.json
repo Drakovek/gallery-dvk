@@ -1,6 +1,25 @@
 {
     "#": "List of all the extractors available",
 
+    "docslab":
+    {
+        "#": "Sets gallery-dvk to write JSON metadata for pages downloaded from docs-lab.com",
+        "metadata": true,
+
+        "#": "Sets the path to the download archive for Doc's Lab",
+        "archive": "/path/to/archive.db",
+
+        "#": "Overrides the default include values to include favorites when downloading from a Doc's Lab user",
+        "include": ["submissions", "favorites"],
+
+        "#": "Overrides default settings to not automatically download associated works of submissions",
+        "download_artwork": true,
+        "download_stories": true,
+
+        "#": "Overrides the default filename format to include the page date and ID",
+        "filename_format": "[{date}_{id}] {title}"
+    },
+
     "transfur":
     {
         "#": "Sets gallery-dvk to write JSON metadata for pages downloaded from Transfur.com",

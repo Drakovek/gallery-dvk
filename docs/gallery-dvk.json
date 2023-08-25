@@ -1,4 +1,13 @@
 {
+    "docslab":
+    {
+        "metadata": false,
+        "archive": null,
+        "include": ["submissions"],
+        "download_artwork": false,
+        "download_stories": false,
+        "filename_format": "{id}_{title}"
+    },
     "transfur":
     {
         "metadata": false,

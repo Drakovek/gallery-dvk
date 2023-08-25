@@ -5,10 +5,10 @@
 It is heavily inspired by [gallery-dl](https://github.com/mikf/gallery-dl), and if I were smart, I probably would have just forked gallery-dl, but I couldn't fully wrap my head around how the codebase works, so here we are. I may not be able to parse the code very well, but I've ripped off gallery-dl's user documentation pretty thoroughly here.
 
 Contents:
-+ [Installation](##installation)
-+ [Usage](##usage)
-+ [Configuration](##configuration)
-+ [Authentication](##authentication)
++ [Installation](#installation)
++ [Usage](#usage)
++ [Configuration](#configuration)
++ [Authentication](#authentication)
 
 ## Installation
 
@@ -69,7 +69,7 @@ A more in-depth example config file can be found at [/docs/gallery-dvk-example.j
 
 Most extractors require login credentials to access some locked content, and some require login credentials to access the site at all.
 
-You can set the necessary login information in your [configuration file](##configuration).
+You can set the necessary login information in your [configuration file](#configuration).
 
     {
         "transfur":

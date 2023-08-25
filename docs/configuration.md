@@ -95,3 +95,41 @@ If set to `null`, *gallery-dvk* will prompt the user for username and password i
 A list of subcategories to include when processing a user profile.
 
 Possible values are `"gallery"`, `"sketches"`, and `"favorites"`
+
+### docslab.include
+
+***Type***
++ `list` of `strings`
+
+***Default***
++ `["submissions"]`
+
+***Descrtiption***
+
+A list of subcategories to include when processing a user profile.
+
+Possible values are `"submissions"` and `"favorites"`
+
+### docslab.download_artwork
+
+***Type***
++ `bool`
+
+***Default***
++ `false`
+
+***Descripton***
+
+Whether to automatically download associated artwork submissions when downloading story submissions.
+
+### docslab.download_stories
+
+***Type***
++ `bool`
+
+***Default***
++ `false`
+
+***Descripton***
+
+Whether to automatically download parent story submissions when downloading artwork submissions.

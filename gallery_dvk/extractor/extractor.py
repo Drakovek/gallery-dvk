@@ -53,7 +53,10 @@ def get_filename_from_page(page:dict, directory:str, filename_format:str="{title
     num = 2
     base_filename = filename
     while (exists(abspath(join(directory, f"{filename}{extension}")))
-                or exists(abspath(join(directory, f"{filename}.json")))):
+                or exists(abspath(join(directory, f"{filename}.json")))
+                or exists(abspath(join(directory, f"{filename}.htm")))
+                or exists(abspath(join(directory, f"{filename}.html")))
+                or exists(abspath(join(directory, f"{filename}.txt")))):
         filename = f"{base_filename}-{num}"
         num += 1
     # Return the filename
@@ -100,7 +103,8 @@ def get_date(date_string:str, date_order:str=None) -> str:
         except KeyError: month = None
     assert int(month) < 13
     # Get the day
-    day = re.findall(r"(?<=[^:])\b[0-3]?[0-9]\b(?=[^:])", f" {date_string} ")[0].zfill(2)
+    day_regex = r"(?<=[^:])\b[0-3]?[0-9]\b(?=[^:])|\b[0-3]?[0-9](?=st\b)|\b[0-3]?[0-9](?=th\b)|\b[0-3]?[0-9](?=[nr]d\b)"
+    day = re.findall(day_regex, f" {date_string.lower()} ")[0].zfill(2)
     # Get the year
     year = re.findall(r"(?<=[^:])\b[0-9]{4}\b(?=[^:])", f" {date_string} ")[0]
     # Return a string for the year
@@ -422,24 +426,39 @@ class Extractor:
                 os.mkdir(full_directory)
         # Get filename
         filename = get_filename_from_page(page, directory, self.filename_format)
+        # Write text, if available
+        text = None
+        updated_page = page
+        try:
+            text = page["text"]
+            updated_page.pop("text")
+            extension = ".txt"
+            if text.startswith("<!DOCTYPE html>"):
+                extension = ".html"
+            media_file = abspath(join(full_directory, f"{filename}{extension}"))
+            mm_file_tools.write_text_file(media_file, text)
+        except (AttributeError, KeyError): pass
         # Get media URL
+        media_url = None
         try:
             media_url = page["image_url"]
         except KeyError:
-            media_url = page["url"]
+            if text is None:
+                media_url = page["url"]
         # Download media
-        extension = html_string_tools.html.get_extension(media_url)
-        if extension == "":
-            extension = ".jpg"
-        media_file = abspath(join(full_directory, f"{filename}{extension}"))
-        response = self.download(media_url, media_file)
-        assert exists(media_file)
+        if media_url is not None:
+            extension = html_string_tools.html.get_extension(media_url)
+            if extension == "":
+                extension = ".jpg"
+            media_file = abspath(join(full_directory, f"{filename}{extension}"))
+            response = self.download(media_url, media_file)
+            assert exists(media_file)
+            # Add date if required
+            try:
+                date = updated_page["date"]
+            except KeyError:
+                updated_page["date"] = get_date(response["Last-Modified"])
         python_print_tools.printer.color_print(page["url"], "g")
-        # Add date if required
-        updated_page = page
-        try: date = updated_page["date"]
-        except KeyError:
-            updated_page["date"] = get_date(response["Last-Modified"])
         # Write JSON file
         if self.write_metadata:
             json_file = abspath(join(full_directory, f"{filename}.json"))

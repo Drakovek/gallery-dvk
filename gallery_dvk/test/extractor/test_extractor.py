@@ -32,11 +32,12 @@ def test_get_filename_from_page():
     assert gd_extractor.get_filename_from_page(page, temp_dir) == "duplicate-2"
     # Test if there is an existing json file with the same name
     mm_file_tools.write_json_file(abspath(join(temp_dir, "new.json")), {"key":"value"})
-    mm_file_tools.write_json_file(abspath(join(temp_dir, "new-2.json")), {"key":"value"})
+    mm_file_tools.write_json_file(abspath(join(temp_dir, "new-2.html")), {"key":"value"})
+    mm_file_tools.write_json_file(abspath(join(temp_dir, "new-3.txt")), {"key":"value"})
     page = {"title":"new", "image_url":"blah/thing.txt"}
-    assert gd_extractor.get_filename_from_page(page, temp_dir) == "new-3"
+    assert gd_extractor.get_filename_from_page(page, temp_dir) == "new-4"
     page = {"title":"new", "url":"blah/thing.png"}
-    assert gd_extractor.get_filename_from_page(page, temp_dir) == "new-3"
+    assert gd_extractor.get_filename_from_page(page, temp_dir) == "new-4"
 
 def test_get_date():
     """
@@ -49,11 +50,11 @@ def test_get_date():
     assert gd_extractor.get_date("14 April, 2023") == "2023-04-14"
     assert gd_extractor.get_date("  14  May,  2023 ") == "2023-05-14"
     assert gd_extractor.get_date("12 June 2014") == "2014-06-12"
-    assert gd_extractor.get_date("12:30 July 15 2023") == "2023-07-15"
+    assert gd_extractor.get_date("12:30 July 1st 2023") == "2023-07-01"
     assert gd_extractor.get_date("August 24, 2023") == "2023-08-24"
     assert gd_extractor.get_date("Thing 2015 September 4") == "2015-09-04"
-    assert gd_extractor.get_date("October  18 , 1997 other crap") == "1997-10-18"
-    assert gd_extractor.get_date("14 November, 2022") == "2022-11-14"
+    assert gd_extractor.get_date("October  18th , 1997 other crap") == "1997-10-18"
+    assert gd_extractor.get_date("04th November, 2022") == "2022-11-04"
     assert gd_extractor.get_date("14, December 2023  12:14") == "2023-12-14"
     # Test getting date with abriviated month
     assert gd_extractor.get_date("Udf, 10 Jan 2010 12:05:55 GMT") == "2010-01-10"
@@ -61,13 +62,13 @@ def test_get_date():
     assert gd_extractor.get_date("Mar 13, 1997  ") == "1997-03-13"
     assert gd_extractor.get_date("Apr 25, 2034 20:12") == "2034-04-25"
     assert gd_extractor.get_date(" 3 may 2014") == "2014-05-03"
-    assert gd_extractor.get_date("Time jun 28 2040 Thing") == "2040-06-28"
+    assert gd_extractor.get_date("Time jun 23RD, 2040 Thing") == "2040-06-23"
     assert gd_extractor.get_date("10 JUL 2042") == "2042-07-10"
     assert gd_extractor.get_date("AUG 2042 10") == "2042-08-10"
-    assert gd_extractor.get_date("10 sep 2042") == "2042-09-10"
+    assert gd_extractor.get_date("10th sep 2042") == "2042-09-10"
     assert gd_extractor.get_date("10 oct 2042") == "2042-10-10"
-    assert gd_extractor.get_date("10 nov 2042") == "2042-11-10"
-    assert gd_extractor.get_date("10 dec 2042") == "2042-12-10"
+    assert gd_extractor.get_date("3rd nov 2042") == "2042-11-03"
+    assert gd_extractor.get_date("2nd dec 2042") == "2042-12-02"
     # Test getting date in various number formats
     assert gd_extractor.get_date("10/1/2020", date_order="dmy") == "2020-01-10"
     assert gd_extractor.get_date(" 9/02/2020 ", date_order="dmy") == "2020-02-09"
@@ -336,8 +337,6 @@ def test_download():
         extractor.download(url, None)
         assert not exists(file)
 
-
-    
 def test_download_page():
     """
     Tests the download_page method.
@@ -362,11 +361,29 @@ def test_download_page():
     assert meta["title"] == "Thing!"
     assert meta["url"] == "https://www.pythonscraping.com/img/gifts/img6.jpg"
     assert meta["date"] == "2014-08-04"
+    # Test creating a text file from the page
+    page = {"title":"Other", "url":"/not/important/", "text":"This is a text file!", "date":"2023-01-01"}
+    with Extractor("thing", [config_file]) as extractor:
+        media_file = extractor.download_page(page, temp_dir)
+        assert basename(media_file) == "Other.txt"
+        assert exists(media_file)
+        assert extractor.archive_contains("/not/important/")
+    json_file = abspath(join(temp_dir, "Other.json"))
+    assert exists(json_file)
+    assert mm_file_tools.read_text_file(media_file) == "This is a text file!"
+    meta = mm_file_tools.read_json_file(json_file)
+    assert meta["title"] == "Other"
+    assert meta["url"] == "/not/important/"
+    assert meta["date"] == "2023-01-01"
+    try:
+        assert meta["text"] == None
+    except KeyError: pass
     # Test downloading to subdirectory, retaining date
     page["title"] = "Title: Revelations"
     page["url"] = "blah"
     page["image_url"] = "https://www.pythonscraping.com/img/gifts/img4.jpg"
     page["date"] = "2017-10-31"
+    page["text"] = "<!DOCTYPE html><html>thing!</html>"
     with Extractor("thing", [config_file]) as extractor:
         extractor.filename_format = "[{date}] {title}"
         media_file = extractor.download_page(page, temp_dir, ["sub", "dirs"])
@@ -380,13 +397,20 @@ def test_download_page():
     assert exists(json_file)
     assert os.stat(media_file).st_size == 85007
     meta = mm_file_tools.read_json_file(json_file)
+    text_file = abspath(join(sub, "[2017-10-31] Title - Revelations.html"))
+    assert exists(text_file)
+    assert mm_file_tools.read_text_file(text_file) == "<!DOCTYPE html><html>thing!</html>"
     assert meta["title"] == "Title: Revelations"
     assert meta["url"] == "blah"
     assert meta["image_url"] == "https://www.pythonscraping.com/img/gifts/img4.jpg"
     assert meta["date"] == "2017-10-31"
+    try:
+        assert meta["text"] == None
+    except KeyError: pass
     # Test that ids were added to database
     with Extractor("thing", [config_file]) as extractor:
         extractor.initialize()
+        assert extractor.archive_contains("/not/important/")
         assert extractor.archive_contains("blah")
         assert extractor.archive_contains("https://www.pythonscraping.com/img/gifts/img6.jpg")
         assert not extractor.archive_contains("Something Else")
