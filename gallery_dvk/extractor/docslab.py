@@ -221,7 +221,11 @@ class DocsLab(gallery_dvk.extractor.extractor.Extractor):
                     paragraphs = story_element.find_all("p")
                     text = "<!DOCTYPE html><html><body>"
                     for paragraph in paragraphs:
-                        text = text + str(paragraph)
+                        paragraph_text = str(paragraph)
+                        paragraph_text = re.sub(r"^\s*<p>\s+", "<p>", paragraph_text)
+                        paragraph_text = re.sub(r"\s+<\/p>\s*$", "</p>", paragraph_text)
+                        paragraph_text = paragraph_text.replace("<p></p>", "")
+                        text = f"{text}{paragraph_text}"
                     text = f"{text}</body></html>"
                     submission["text"] = text
                     break
