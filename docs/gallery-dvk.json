@@ -8,6 +8,12 @@
         "download_stories": false,
         "filename_format": "{id}_{title}"
     },
+    "kemonocafe":
+    {
+        "metadata": false,
+        "archive": null,
+        "filename_format": "{id}"
+    },
     "transfur":
     {
         "metadata": false,

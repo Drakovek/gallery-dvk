@@ -20,6 +20,18 @@
         "filename_format": "[{date}_{id}] {title}"
     },
 
+    "kemonocafe":
+    {
+        "#": "Sets gallery-dvk to write JSON metadata for pages downloaded from kemono.cafe",
+        "metadata": true,
+
+        "#": "Sets the path to the download archive for Kemono Café",
+        "archive": "/archive/path.db",
+
+        "#": "Overrides the default filename format to only use the Kemono Café ID",
+        "filename_format": "{id}"
+    },
+
     "transfur":
     {
         "#": "Sets gallery-dvk to write JSON metadata for pages downloaded from Transfur.com",
