@@ -80,6 +80,26 @@ The login credentials for the extractor. This is required to access locked conte
 
 If set to `null`, *gallery-dvk* will prompt the user for username and password if necessary.
 
+### \*.webpage_sleep & download_sleep
+
+***Type***
++ `number`
+
+***Default***
++ `1.5`
+
+***Example***
+
+    website:
+    {
+        "webpage_sleep": 1.0,
+        "download_sleep": 2.5
+    }
+
+***Description***
+
+The amount of time to wait in seconds after loading a webpage and downloading a file, respectively. Increasing this wait time can reduce load on bandwidth and reduce the number of response errors.
+
 ## Extractor-Specific Options
 
 ### transfur.include

@@ -150,6 +150,8 @@ def test_get_info_from_config():
         assert extractor.password is None
         assert not extractor.attempted_login
         assert extractor.filename_format == "{title}"
+        assert extractor.webpage_sleep == 1.5
+        assert extractor.download_sleep == 1.5
     # Test getting the archive_file from the config file
     temp_dir = mm_file_tools.get_temp_dir()
     config_file = abspath(join(temp_dir, "config.json"))
@@ -181,6 +183,12 @@ def test_get_info_from_config():
     mm_file_tools.write_json_file(config_file, config)
     with Extractor("thing", [config_file]) as extractor:
         assert extractor.filename_format == "[{date}] {title}"
+    # Test getting sleep values
+    config = {"thing":{"webpage_sleep":2.5, "download_sleep":3.0}}
+    mm_file_tools.write_json_file(config_file, config)
+    with Extractor("thing", [config_file]) as extractor:
+        assert extractor.webpage_sleep == 2.5
+        assert extractor.download_sleep == 3.0
     # Test if the category is invalid
     with Extractor("different", [config_file]) as extractor:
         assert extractor.archive_file is None
@@ -191,6 +199,29 @@ def test_get_info_from_config():
         assert extractor.password is None
         assert not extractor.attempted_login
         assert extractor.filename_format == "{title}"
+        assert extractor.webpage_sleep == 1.5
+        assert extractor.download_sleep == 1.5
+    # Test if the data types are invalid
+    config = {"archive":1}
+    config["metadata"] = "blah"
+    config["include"] = "thing"
+    config["username"] = False
+    config["password"] = False
+    config["filename_format"] = False
+    config["webpage_sleep"] = "thing"
+    config["download_sleep"] = "thing"
+    mm_file_tools.write_json_file(config_file, {"thing":config})
+    with Extractor("thing", [config_file]) as extractor:
+        assert extractor.archive_file is None
+        assert extractor.archive_connection is None
+        assert not extractor.write_metadata
+        assert extractor.include == []
+        assert extractor.username is None
+        assert extractor.password is None
+        assert not extractor.attempted_login
+        assert extractor.filename_format == "{title}"
+        assert extractor.webpage_sleep == 1.5
+        assert extractor.download_sleep == 1.5
 
 def test_open_archive():
     """

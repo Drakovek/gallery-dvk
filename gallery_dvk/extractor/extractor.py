@@ -110,6 +110,31 @@ def get_date(date_string:str, date_order:str=None) -> str:
     # Return a string for the year
     return f"{year}-{month}-{day}"
 
+def get_category_value(config:dict, category:str, key:str, value_type, default):
+        """
+        Returns the value of a given key in a given category in a config file.
+        If key is missing or not of the correct value, the default value is returned.
+
+        :param config: Dictionary containing gallery-dvk config info
+        :type config: dict, required
+        :param category: Category of extractor to search config file for
+        :type category: str, required
+        :param key: Key of the value to return
+        :type key: str, requrired
+        :param value_type: Type of value the result must match
+        :type value_type: Any, required
+        :param default: Value to return if the value of the key is invalid
+        :type default: Any, required
+        :return: Value of the given key
+        :rtype: Any
+        """
+        try:
+            value = config[category][key]
+            assert isinstance(value, value_type)
+            return value
+        except (AssertionError, KeyError):
+            return default
+
 class Extractor:
     def __init__(self, category:str, config_paths:List[str]=gallery_dvk.config.get_default_config_paths()):
         """
@@ -227,29 +252,23 @@ class Extractor:
         :type category: str, required
         """
         # Get the archive file
-        try:
-            self.archive_file = str(config[category]["archive"])
-        except KeyError: self.archive_file = None
+        self.archive_file = get_category_value(config, category, "archive", str, None)
         # Get whether to include metadata
-        try:
-            self.write_metadata = bool(config[category]["metadata"])
-        except KeyError: self.write_metadata = False
+        self.write_metadata = get_category_value(config, category, "metadata", bool, False)
         # Get the galleries to include
+        self.include = get_category_value(config, category, "include", list, [])
+        # Get the site username and password
+        self.username = get_category_value(config, category, "username", str, None)
+        self.password = get_category_value(config, category, "password", str, None)
+        # Get the filename format for the extractor
+        self.filename_format = get_category_value(config, category, "filename_format", str, "{title}")
+        # Get the sleep wait times for the extractor
         try:
-            self.include = config[category]["include"]
-        except KeyError: self.include = []
-        # Get the site username
+            self.webpage_sleep = float(config[category]["webpage_sleep"])
+        except (ValueError, KeyError): self.webpage_sleep = 1.5
         try:
-            self.username = str(config[category]["username"])
-        except KeyError: self.username = None
-        # Get the site password
-        try:
-            self.password = str(config[category]["password"])
-        except KeyError: self.password = None
-        # Get the filename format for the site
-        try:
-            self.filename_format = str(config[category]["filename_format"])
-        except KeyError: self.filename_format = "{title}"
+            self.download_sleep = float(config[category]["download_sleep"])
+        except (ValueError, KeyError): self.download_sleep = 1.5
             
     
     def open_archive(self):
@@ -344,14 +363,12 @@ class Extractor:
         """
         self.dict_to_header(self.requests_session.cookies.get_dict(), "Cookie")
         
-    def web_get(self, url:str, sleep:float=1.0) -> bs4.BeautifulSoup:
+    def web_get(self, url:str) -> bs4.BeautifulSoup:
         """
         Returns a BeautifulSoup object for the response of a GET request on a given URL.
         
         :param url: URL to get with a GET request
         :type url: str, required
-        :param sleep: Amount of time to sleep after the request, defaults to 1.0
-        :type sleep: float, optional
         :return: BeautifulSoup object from the response
         :rtype: BeautifulSoup
         """
@@ -359,10 +376,10 @@ class Extractor:
         self.initialize()
         response = self.requests_session.get(url)
         # Get BeautifulSoup object from the URL
-        time.sleep(sleep)
+        time.sleep(self.webpage_sleep)
         response.encoding = "utf-8"
-        bs = bs4.BeautifulSoup(response.text, features="lxml")
-        return bs
+        self.beautifulsoup = bs4.BeautifulSoup(response.text, features="lxml")
+        return self.beautifulsoup
         
     def download(self, url:str=None, file_path:str=None, sleep:float=1.0) -> dict:
         """
@@ -385,6 +402,7 @@ class Extractor:
             byte_obj.seek(0)
             with open(file, "wb") as f:
                 shutil.copyfileobj(byte_obj, f)
+            time.sleep(self.download_sleep)
             return response.headers
         except (AttributeError,
                     urllib.error.HTTPError,
@@ -394,7 +412,6 @@ class Extractor:
                     TypeError):
             if url is not None:
                 python_print_tools.printer.color_print(f"Failed to download: {url}", "r")
-        time.sleep(sleep)
         return dict()
     
     def download_page(self, page:dict, directory:str, subs:List[str]=[]) -> str:

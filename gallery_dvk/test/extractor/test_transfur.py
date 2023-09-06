@@ -297,6 +297,7 @@ def test_with_login():
         try:
             transfur.archive_connection.close()
         except AttributeError: pass
+        transfur.filename_format = "{id}_{title}"
         transfur.archive_file = archive_file
         transfur.open_archive()
         transfur.write_metadata = True

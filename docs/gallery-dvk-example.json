@@ -17,7 +17,11 @@
         "download_stories": true,
 
         "#": "Overrides the default filename format to include the page date and ID",
-        "filename_format": "[{date}_{id}] {title}"
+        "filename_format": "[{date}_{id}] {title}",
+
+        "#": "Overrides the default amount of time to sleep when loading pages and downloading files",
+        "webpage_sleep": 2.0,
+        "download_sleep": 5.0
     },
 
     "kemonocafe":
@@ -29,7 +33,11 @@
         "archive": "/archive/path.db",
 
         "#": "Overrides the default filename format to only use the Kemono Café ID",
-        "filename_format": "{id}"
+        "filename_format": "{id}",
+
+        "#": "Overrides the default amount of time to sleep when loading pages and downloading files",
+        "webpage_sleep": 3.0,
+        "download_sleep": 3.0
     },
 
     "transfur":
@@ -48,6 +56,10 @@
         "include": ["gallery", "sketches", "favorites"],
         
         "#": "Overrides the default filename format to include the page date and ID",
-        "filename_format": "[{date}_{id}] {title}"
+        "filename_format": "[{date}_{id}] {title}",
+
+        "#": "Overrides the default amount of time to sleep when loading pages and downloading files",
+        "webpage_sleep": 1.0,
+        "download_sleep": 2.0
     }
 }

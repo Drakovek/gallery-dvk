@@ -6,13 +6,17 @@
         "include": ["submissions"],
         "download_artwork": false,
         "download_stories": false,
-        "filename_format": "{id}_{title}"
+        "filename_format": "{id}_{title}",
+        "webpage_sleep": 1.5,
+        "download_sleep": 1.5
     },
     "kemonocafe":
     {
         "metadata": false,
         "archive": null,
-        "filename_format": "{id}"
+        "filename_format": "{id}",
+        "webpage_sleep": 1.5,
+        "download_sleep": 1.5
     },
     "transfur":
     {
@@ -21,6 +25,8 @@
         "username": null,
         "password": null,
         "include": ["gallery", "sketches"],
-        "filename_format": "{id}_{title}"
+        "filename_format": "{id}_{title}",
+        "webpage_sleep": 1.5,
+        "download_sleep": 1.5
     }
 }

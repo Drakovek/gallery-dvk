@@ -172,10 +172,12 @@ class KemonoCafe(gallery_dvk.extractor.extractor.Extractor):
         image = comic_container.find("img")
         page["image_url"] = image["src"]
         # Get the page title
-        page["tagline"] = bs.find("title", string=re.compile("|")).get_text()
-        page["comic"] = re.findall(r"[^\|]+(?=\|)", page["tagline"])[0]
+        page["tagline"] = bs.find("title", string=re.compile(r"[\|:]")).get_text()
+        page["comic"] = re.findall(r"^[^\|:]+(?=[\|:])", page["tagline"])[0]
         page["comic"] = re.sub(r"^\s+|\s+$", "", page["comic"])
-        page["author"] = re.findall(r"(?<=\sby\s)[A-z0-9\s]+$", page["tagline"])[0]
+        try:
+            page["author"] = re.findall(r"(?<=\sby\s)[A-z0-9\s]+$", page["tagline"])[0]
+        except IndexError: page["author"] = None
         # Get the date from the image file
         try:
             regex = r"(?<=\/)[0-9]{4}-[0-1][0-9]-[0-3][0-9](?=[^0-9])"

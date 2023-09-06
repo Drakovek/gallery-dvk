@@ -11,7 +11,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gallery-dvk",
-    version="0.1.4",
+    version="0.1.5",
     author="Drakovek",
     author_email="DrakovekMail@gmail.com",
     description="Utility for downloading media from various image hosting websites.",
