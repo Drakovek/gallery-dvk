@@ -417,10 +417,10 @@ def test_download_page():
     page["text"] = "<!DOCTYPE html><html>thing!</html>"
     with Extractor("thing", [config_file]) as extractor:
         extractor.filename_format = "[{date}] {title}"
-        media_file = extractor.download_page(page, temp_dir, ["sub", "dirs"])
+        media_file = extractor.download_page(page, temp_dir, ["sub", "dirs"], "-23")
         assert basename(media_file) == "[2017-10-31] Title - Revelations.jpg"
         assert exists(media_file)
-        assert extractor.archive_contains("blah")
+        assert extractor.archive_contains("blah-23")
     sub = abspath(join(temp_dir, "sub"))
     sub = abspath(join(sub, "dirs"))
     assert exists(sub)
@@ -442,12 +442,12 @@ def test_download_page():
     with Extractor("thing", [config_file]) as extractor:
         extractor.initialize()
         assert extractor.archive_contains("/not/important/")
-        assert extractor.archive_contains("blah")
+        assert extractor.archive_contains("blah-23")
         assert extractor.archive_contains("https://www.pythonscraping.com/img/gifts/img6.jpg")
         assert not extractor.archive_contains("Something Else")
     # Test if file is already downloaded
     with Extractor("thing", [config_file]) as extractor:
-        media_file = extractor.download_page(page, temp_dir, ["new"])
+        media_file = extractor.download_page(page, temp_dir, ["new"], "-23")
         assert media_file is None
         assert not exists(abspath(join(temp_dir, "new")))
         extractor.add_to_archive("totally new")

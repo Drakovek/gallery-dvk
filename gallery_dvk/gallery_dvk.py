@@ -8,6 +8,7 @@ import metadata_magic.file_tools as mm_file_tools
 from gallery_dvk.extractor.docslab import DocsLab
 from gallery_dvk.extractor.kemonocafe import KemonoCafe
 from gallery_dvk.extractor.transfur import Transfur
+from gallery_dvk.extractor.webtoon import Webtoon
 from os.path import abspath, exists
 
 class GalleryDVK():
@@ -22,7 +23,7 @@ class GalleryDVK():
         Setup for when GallerDVK is opened.
         Create an object for each Extractor.
         """
-        self.extractors = [DocsLab(), KemonoCafe(), Transfur()]
+        self.extractors = [DocsLab(), KemonoCafe(), Transfur(), Webtoon()]
         return self
         
     def __exit__(self, *args):
@@ -83,7 +84,7 @@ class GalleryDVK():
 
 def main():
     """
-    Sets up downloading from Transfur.com
+    Sets up parser for downloading images.
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(

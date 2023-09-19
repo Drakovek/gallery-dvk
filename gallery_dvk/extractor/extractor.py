@@ -414,7 +414,7 @@ class Extractor:
                 python_print_tools.printer.color_print(f"Failed to download: {url}", "r")
         return dict()
     
-    def download_page(self, page:dict, directory:str, subs:List[str]=[]) -> str:
+    def download_page(self, page:dict, directory:str, subs:List[str]=[], id_append:str="") -> str:
         """
         Downloads a URL from info gathered from a page dict.
         Creates a JSON metadata file from the page if self.write_metadata in Extractor is True.
@@ -426,12 +426,15 @@ class Extractor:
         :type directory: str, required
         :param subs: Optional subdirectories to create to save files into, defaults to []
         :type subs: list[str]
+        :param id_append: String to append to generated ID when searching for existing downloads, defaults to ""
+        :type id_append: str, optional
         :return: Path of the media file created, if applicable
         :rtype: str
         """
         # Check if the page is already downloaded
         self.initialize()
         identifier = self.get_id(page["url"])
+        identifier = f"{identifier}{id_append}"
         if self.archive_contains(identifier):
             print(page["url"])
             return None
@@ -475,7 +478,7 @@ class Extractor:
                 date = updated_page["date"]
             except KeyError:
                 updated_page["date"] = get_date(response["Last-Modified"])
-        python_print_tools.printer.color_print(page["url"], "g")
+        python_print_tools.printer.color_print(page["url"] + id_append, "g")
         # Write JSON file
         if self.write_metadata:
             json_file = abspath(join(full_directory, f"{filename}.json"))
