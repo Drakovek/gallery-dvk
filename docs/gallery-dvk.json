@@ -35,6 +35,8 @@
         "archive": null,
         "filename_format": "{id}_{title}",
         "webpage_sleep": 1.5,
-        "download_sleep": 1.5
+        "download_sleep": 1.5,
+        "stitch_images": true,
+        "only_stitched": false
     }
 }

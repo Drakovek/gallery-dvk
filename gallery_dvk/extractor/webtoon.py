@@ -1,9 +1,43 @@
 #!/usr/bin/env python3
 
+import os
 import re
+import math
 import operator
 import gallery_dvk.extractor.extractor
+import metadata_magic.file_tools as mm_file_tools
+from PIL import Image
+from os.path import abspath, exists, join
 from typing import List
+
+def stitch_images(top_image:Image, bottom_image:Image) -> Image:
+    """
+    Stitches two images into one image, with the originals stacked on top of each other vertically.
+    
+    :param top_image: Image to place on top
+    :type top_image: Image, required
+    :param bottom_image: Image to place on bottom
+    :type bottom_image: Image, required
+    :return: Images stitched together, stacked vertically
+    :rtype: Image
+    """
+    # Get the sizes of the images
+    t_width, t_height = top_image.size
+    b_width, b_height = bottom_image.size
+    # Create the new image
+    height = t_height + b_height
+    width = t_width
+    if b_width > t_width:
+        width = b_width
+    stitched = Image.new("RGB", (width, height), "#ffffff")
+    # Paste the top image
+    x = int(math.floor((width - t_width)/2))
+    stitched.paste(top_image, (x, 0, x+t_width, t_height))
+    # Paste the bottome image
+    x = int(math.floor((width - b_width)/2))
+    stitched.paste(bottom_image, (x, t_height, x+b_width, height))
+    # Return the stitched image
+    return stitched
 
 class Webtoon(gallery_dvk.extractor.extractor.Extractor):
     def __init__(self, config_paths:List[str]=gallery_dvk.config.get_default_config_paths()):
@@ -36,6 +70,21 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
         # Set the headers to use webtoons.com as a referer
         headers = self.requests_session.headers.update({"Referer":"https://www.webtoons.com/"})
     
+    def get_info_from_config(self, config:dict, category:str):
+        """
+        Sets variables in the Extractor object based on values in a given config dictionary.
+        
+        :param config: Dictionary containing gallery-dvk config info
+        :type config: dict, required
+        :param category: Category of extractor to search config file for
+        :type category: str, required
+        """
+        super().get_info_from_config(config, "webtoon")
+        # Get whether to stitch images from an episode together
+        self.stitch_images = gallery_dvk.extractor.extractor.get_category_value(config, category, "stitch_images", bool, True)
+        # Get whether to delete individual images if a stitched image is created
+        self.only_stitched = gallery_dvk.extractor.extractor.get_category_value(config, category, "only_stitched", bool, False)
+    
     def get_id(self, url:str) -> str:
         """
         Gets the id for a Webtoon page.
@@ -63,8 +112,7 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
         :rtype: bool
         """
         pages = self.get_episode_info(section)
-        for page in pages:
-            self.download_page(page, directory)
+        self.download_episode_images(pages, directory)
         return True
     
     def download_toon(self, section:str, directory:str) -> bool:
@@ -82,8 +130,7 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
         for episode in episodes:
             episode_section = re.findall(self.episode_section, episode["url"])[0]
             pages = self.get_episode_info(episode_section, episode)
-            for page in pages:
-                self.download_page(page, directory)
+            self.download_episode_images(pages, directory)
         return True
     
     def get_episodes(self, section:str) -> List[dict]:
@@ -99,14 +146,15 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
         # Load page
         bs = self.web_get(f"https://www.webtoons.com/{section}")
         # Get the webtoon title
-        title_element = bs.find("h1", {"class":"subj"})
+        detail_header = bs.find("div", {"class":"detail_header"})
+        title_element = detail_header.find(attrs={"class":"subj"})
         base = {"webtoon":re.sub(r"^\s+|\s+$", "", title_element.get_text())}
         # Get the webtoon genre
-        genre_element = bs.find("h2", {"class":"genre"})
+        genre_element = detail_header.find(attrs={"class":"genre"})
         base["genre"] = re.sub(r"^\s+|\s+$", "", genre_element.get_text())
         # Get the webtoon authors(s)
         authors = []
-        author_elements = bs.find_all("a", {"class":"author"})
+        author_elements = detail_header.find_all("a", {"class":"author"})
         for author_element in author_elements:
             authors.append(re.sub(r"^\s+|\s+$", "", author_element.get_text()))
         base["authors"] = authors
@@ -239,3 +287,69 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
         image_number = str(page["image_number"])
         subs = ["Webtoon", page["webtoon"], page["title"]]
         return super().download_page(page, directory, subs, f"-i{image_number}")
+
+    def download_episode_images(self, pages:List[dict], directory:str) -> List[str]:
+        """
+        Downloads all the images for a given Webtooon episode.
+        The episode images will be stitched together if specified in the gallery_dvk config file.
+        If specified in the config file, only the stitched file will be included.
+        
+        :param pages: Webtoons episode pages, as returned by get_episode_info
+        :type pages: required, List[dict]
+        :param directory: Directory in which to save files
+        :type directory: str, required
+        :return: List of media files that have been downloaded/created through stitching
+        :rtype: List[str]
+        """
+        # Download media files
+        media_files = []
+        for page in pages:
+            media_file = self.download_page(page, directory)
+            if media_file is not None:
+                media_files.append(media_file)
+        # Stitch media files together, if specified
+        if self.stitch_images:
+            images = []
+            stitched = None
+            for i in range(0, len(media_files)):
+                # Load media file
+                bottom_image = Image.open(media_files[i])
+                # Get info for the image
+                image_info = {"image_url": pages[i]["image_url"]}
+                image_info["image_number"] = pages[i]["image_number"]
+                image_info["id"] = pages[i]["id"]
+                image_info["width"] = bottom_image.size[0]
+                image_info["height"] = bottom_image.size[1]
+                images.append(image_info)
+                # Stitch the image
+                if stitched is None:
+                    stitched = bottom_image
+                else:
+                    stitched = stitch_images(stitched, bottom_image)
+            # Create the metadata for the stitched image
+            metadata = dict()
+            for item in pages[i].items():
+                metadata[item[0]] = item[1]
+            metadata["id"] = re.sub("-[0-9]+$", "", metadata["id"])
+            metadata.pop("image_url")
+            metadata.pop("image_number")
+            metadata["images"] = images
+            # Save stitched file
+            parent = abspath(join(media_files[0], os.pardir))
+            filename = gallery_dvk.extractor.extractor.get_filename_from_page(metadata, parent, self.filename_format)
+            stitched_file = abspath(join(parent, f"{filename}.png"))
+            stitched.save(stitched_file)
+            media_files.append(stitched_file)
+            # Save metadata, if applicable
+            if self.write_metadata:
+                json_file = abspath(join(parent, f"{filename}.json"))
+                mm_file_tools.write_json_file(json_file, metadata)
+        # Return the list of media files
+        if self.stitch_images and self.only_stitched:
+            for i in range(len(media_files)-2, -1, -1):
+                os.remove(media_files[i])
+                json_file = re.sub(r"\.[A-Za-z]+$", ".json", media_files[i])
+                if exists(json_file):
+                    os.remove(json_file)
+                del media_files[i]
+        return media_files

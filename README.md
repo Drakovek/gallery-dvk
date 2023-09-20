@@ -23,6 +23,7 @@ If you are installing from source, the following python packages are required:
 + [Python-Print-Tools](https://github.com/Drakovek/Python-Print-Tools)
 + [requests](https://requests.readthedocs.io/en/latest)
 + [tqdm](https://pypi.org/project/tqdm)
++ [pillow](https://github.com/python-pillow/Pillow) \(If using image stitching for Webtoon\)
 
 ## Usage
 

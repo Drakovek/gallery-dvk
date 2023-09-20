@@ -76,6 +76,10 @@
 
         "#": "Overrides the default amount of time to sleep when loading pages and downloading files",
         "webpage_sleep": 3.0,
-        "download_sleep": 1.0
+        "download_sleep": 1.0,
+        
+        "#": "Sets the Webtoon extractor to only include the stitched-together episode images, not the individual images",
+        "stitch_images": true,
+        "only_stitched": true
     }
 }

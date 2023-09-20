@@ -153,3 +153,27 @@ Whether to automatically download associated artwork submissions when downloadin
 ***Descripton***
 
 Whether to automatically download parent story submissions when downloading artwork submissions.
+
+### webtoon.stitch_images
+
+***Type***
++ `bool`
+
+***Default***
++ `true`
+
+***Description***
+
+If true, the extractor will create a combined image that stitches all the images from a Webtoon episode together vertically so it creates one long, tall image like how the images appear on the Webtoon website/app.
+
+### webtoon.only_stitched
+
+***Type***
++ `bool`
+
+***Default***
++ `false`
+
+***Description***
+
+If true, the extractor will ONLY save the one combined image per Webtoon episode rather than the several individual images that are actually in each episode. If `webtoon.stitch_images` is false, this option has no effect and individual images will be downloaded normally. If `webtoon.stitch_images` AND `webtoon.only_stitched` are both false, both the individual images and the stitched image will be saved to disk.
