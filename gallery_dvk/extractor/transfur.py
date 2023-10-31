@@ -261,6 +261,8 @@ class Transfur(gallery_dvk.extractor.extractor.Extractor):
         # Get statistics
         statistics = bs.find("p", {"class":"statistics"})
         stat_elements = statistics.find_all("span")
+        base_page["views"] = None
+        base_page["favorites"] = None
         for stat_element in stat_elements:
             stat_text = stat_element.get_text().lower()
             if "date:" in stat_text:
@@ -341,17 +343,17 @@ class Transfur(gallery_dvk.extractor.extractor.Extractor):
         :rtype: bool
         """
         # Load the login page to get request verification cookies
-        bs = self.web_get("https://www.transfur.com/Account/SignIn")
+        bs = self.web_get("https://www.transfur.com/Account/Login")
         input_element = bs.find("input", {"name":"__RequestVerificationToken"})
         # Attempt login
         request = {"__RequestVerificationToken":input_element["value"]}
         request["UsernameOrEmail"] = username
         request["Password"] = password
         headers = {"Content-Type":"application/x-www-form-urlencoded"}
-        response = self.requests_session.post("https://www.transfur.com/Account/SignIn", headers=headers, data=request)
+        response = self.requests_session.post("https://www.transfur.com/Account/Login", headers=headers, data=request)
         # Move to main Transfur page
         self.cookies_to_header()
-        bs = self.web_get("https://transfur.com/")
+        bs = self.web_get("https://www.transfur.com/")
         # Check whether login was successful
         member_links = bs.find("div", {"class":"memberLinks"})
         menu_header = member_links.find("a", {"class":"menuHeader"})

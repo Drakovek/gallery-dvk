@@ -114,7 +114,7 @@ class DocsLab(gallery_dvk.extractor.extractor.Extractor):
         for sub_element in sub_elements:
             section = re.findall(self.sub_section, "docs-lab.com" + sub_element["data-href"])[0]
             rating_element = sub_element.find("td", {"class":"text-center"}, string=re.compile(r"^\s*[RXP]G?\s*$"))
-            rating = html_string_tools.regex.remove_whitespace(rating_element.get_text())
+            rating = rating_element.get_text().strip()
             submissions.append({"section":section, "rating":rating})
         # Get favorites
         favorites = []
@@ -156,11 +156,11 @@ class DocsLab(gallery_dvk.extractor.extractor.Extractor):
         bs = self.web_get(submission["url"])
         # Get the title
         title = bs.find("h2", {"style":re.compile("[A-Za-z]+")}).get_text()
-        submission["title"] = html_string_tools.regex.remove_whitespace(title)
+        submission["title"] = title.strip()
         # Get the artist
         artist_element = bs.find("a", {"href":re.compile(r"profiles\/")}).find("strong")
         artist = artist_element.get_text()
-        submission["artist"] = html_string_tools.regex.remove_whitespace(artist)
+        submission["artist"] = artist.strip()
         # Get the date
         date_containers = bs.find_all("div", {"class":re.compile(r"col-xs")})
         for date_container in date_containers:
@@ -190,13 +190,13 @@ class DocsLab(gallery_dvk.extractor.extractor.Extractor):
         try:
             rating_element = bs.find("span", {"class":"headline"}, string=re.compile(r"[Uu]ser\s+[Rr]ating"))
             user_rating = rating_element.parent.find("span", {"class":"value"}).get_text()
-            submission["user_rating"] = int(html_string_tools.regex.remove_whitespace(user_rating))
+            submission["user_rating"] = int(user_rating.strip())
         except ValueError: submission["user_rating"] = 0
         # Get the number of favorites
         try:
             favorites_element = bs.find("span", {"class":"headline"}, string=re.compile(r"[Ff]avorites?"))
             favorites = favorites_element.parent.find("span", {"class":"value"}).get_text()
-            submission["favorites"] = int(html_string_tools.regex.remove_whitespace(favorites))
+            submission["favorites"] = int(favorites.strip())
         except ValueError: submission["favorites"] = 0
         # Get the description
         try:

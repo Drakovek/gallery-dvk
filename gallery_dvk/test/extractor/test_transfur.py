@@ -146,8 +146,7 @@ def test_get_info_from_page():
         assert pages[0]["url"] == f"{base}oter/submissions/17614"
         assert pages[0]["image_url"] == f"{base}oter/images/bear%20tf%20tg%20final.jpg"
         assert pages[0]["tags"] == ["Bear", "Gender Change", "Gender Change - Male to Female", "Surprised"]
-        assert pages[0]["views"] > 19655
-        assert pages[0]["views"] < 20000
+        assert pages[0]["views"] is None
         assert pages[0]["favorites"] > 114
         assert pages[0]["favorites"] < 120
         assert pages[0]["description"] == "<p>Auction piece for Truttle on FA.</p>"
@@ -160,16 +159,15 @@ def test_get_info_from_page():
         assert pages[0]["title"] == "Unexpected Happiness"
         assert pages[0]["artist"] == "Mxmaramoose"
         assert pages[0]["date"] == "2022-08-25"
-        assert pages[0]["tags"] == ["Fox", "Gender Change - Male to Female", "Happy", "Surprised", "wuffkitty"]
-        assert pages[0]["views"] > 7145
-        assert pages[0]["views"] < 7500
+        assert pages[0]["tags"] == ["Fox", "Gender Change - Male to Female", "Happy", "Surprised"]
+        assert pages[0]["views"] is None
         assert pages[0]["favorites"] > 45
         assert pages[0]["favorites"] < 55
         description = "<p>Sometimes life throws an unexpected boon your way..."\
                 +"<a href=\"/Users/WuffKitty\">WuffKitty</a> certainly isn't gonna "\
                 +"question their sudden transformation ^^ #TFEveryday</p>"
         assert pages[0]["description"] == description
-        assert pages[0]["url"] == f"{base}mxmaramoose/submissions/27317"
+        assert pages[0]["url"] == f"{base}mxmaramoose/submissions/27317/1"
         assert pages[0]["image_url"] == f"{base}mxmaramoose/images/lily%20full.png"
         assert pages[0]["id"] == "27317-1"
         assert pages[0]["image_number"] == 1
@@ -241,6 +239,9 @@ def test_get_links_from_gallery():
         assert {"section":f"angrboda/submissions/3018", "num_images":1} in links
 
 def test_download_page():
+    """
+    Tests the download_page method.
+    """
     # Test if ID is already in the database
     temp_dir = mm_file_tools.get_temp_dir()
     base = "https://www.transfur.com/Users/"
@@ -322,8 +323,7 @@ def test_with_login():
         assert pages[0]["image_url"] == f"{base}danwolf/images/resizerimage1280x1810.jpg"
         assert pages[0]["tags"] == ["Big", "Digimon", "Muscular", "Shapeshifter",
                 "Traditional", "Werecreature", "Weregarurumon", "Wolf"]
-        assert pages[0]["views"] > 854
-        assert pages[0]["views"] < 950
+        assert pages[0]["views"] is None
         assert pages[0]["favorites"] > 25
         assert pages[0]["favorites"] < 35
         description = "<p>Foxlightning wanted his a beefy version of his favorite boi ! "\

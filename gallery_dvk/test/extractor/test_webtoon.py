@@ -131,8 +131,8 @@ def test_get_episodes():
         assert episodes[0]["webtoon"] == "A Kat's (GOD AWFUL!!!) Blessing"
         assert episodes[0]["genre"] == "Comedy"
         assert episodes[0]["authors"] == ["Peter Barton"]
-        assert episodes[0]["webtoon_views"] > 1000000
-        assert episodes[0]["webtoon_views"] < 1200000
+        assert episodes[0]["webtoon_views"] > 1200000
+        assert episodes[0]["webtoon_views"] < 1600000
         assert episodes[0]["webtoon_subscribers"] > 15000
         assert episodes[0]["webtoon_subscribers"] < 18000
         assert episodes[0]["webtoon_rating"] > 6.0
