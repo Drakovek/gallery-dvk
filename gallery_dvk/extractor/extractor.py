@@ -13,12 +13,12 @@ import requests
 import gallery_dvk.config
 import html_string_tools
 import python_print_tools.printer
+import metadata_magic.rename as mm_rename
 import metadata_magic.file_tools as mm_file_tools
-import metadata_magic.rename.rename_tools as mm_rename_tools
 from os.path import abspath, exists, join
 from typing import List
 
-def get_filename_from_page(page:dict, directory:str, filename_format:str="{title}") -> str:
+def get_filename_from_page(page:dict, directory:str, filename_template:str="{title}") -> str:
     """
     Creates a filename based on contents of a given page, formatted to a given format.
     Will append filename with a number if the given filename already exists in the given directory.
@@ -29,19 +29,17 @@ def get_filename_from_page(page:dict, directory:str, filename_format:str="{title
     :type page: dict, required
     :param directory: Directory the file is destined for, used to check if filename already exists
     :type directory: str, required
-    :param filename_format: How to format the filename
-    :type filename_format: str, required
+    :param filename_template: How to format the filename
+    :type filename_template: str, required
     :return: Filename for the page
     :rtype: str
     """
-    # Replace stand-in keys in the filename
-    filename = filename_format
-    keys = re.findall(r"(?<={)[^}]+(?=})", filename)
-    for key in keys:
-        try:
-            filename = filename.replace(f"{{{key}}}", page[key])
-        except KeyError: pass
-    filename = mm_rename_tools.create_filename(filename)
+    # Get the default name based on metadata and given template
+    filename = mm_rename.get_string_from_metadata(page, filename_template)
+    if filename is None:
+        filename = mm_rename.get_string_from_metadata(page, "{title}")
+    if filename is None:
+        filename = filename_template
     # Get the extension for the media type
     try: extension = html_string_tools.html.get_extension(page["image_url"])
     except KeyError:
@@ -49,16 +47,9 @@ def get_filename_from_page(page:dict, directory:str, filename_format:str="{title
         except KeyError: extension = ""
     if extension == "":
         extension = ".jpg"
-    # Append the with numbers if necessary
-    num = 2
-    base_filename = filename
-    while (exists(abspath(join(directory, f"{filename}{extension}")))
-                or exists(abspath(join(directory, f"{filename}.json")))
-                or exists(abspath(join(directory, f"{filename}.htm")))
-                or exists(abspath(join(directory, f"{filename}.html")))
-                or exists(abspath(join(directory, f"{filename}.txt")))):
-        filename = f"{base_filename}-{num}"
-        num += 1
+    # Get the filename that is available
+    extensions = [".json", ".htm", ".html", ".txt", extension]
+    filename = mm_rename.get_available_filename(extensions, filename, directory)
     # Return the filename
     return filename
 
@@ -441,7 +432,7 @@ class Extractor:
         # Create subfolders if necessary
         full_directory = abspath(directory)
         for sub in subs:
-            full_directory = abspath(join(full_directory, mm_rename_tools.create_filename(sub)))
+            full_directory = abspath(join(full_directory, mm_rename.get_file_friendly_text(sub)))
             if not exists(full_directory):
                 os.mkdir(full_directory)
         # Get filename
