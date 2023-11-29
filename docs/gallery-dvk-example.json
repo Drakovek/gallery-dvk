@@ -39,6 +39,26 @@
         "webpage_sleep": 3.0,
         "download_sleep": 3.0
     },
+    
+    "tgcomics":
+    {
+        "#": "Sets gallery-dvk to write JSON metadata for pages downloaded from TGComics.com",
+        "metadata": true,
+        
+        "#": "Sets the path to the download archive for TGComics",
+        "archive": "/path/to/archive.db",
+        
+        "#": "Sets the Username and Password for login to TGComics.com",
+        "username": "Example",
+        "password": "Pass1234",
+
+        "#": "Overrides the default filename format to include the page date and ID",
+        "filename_format": "[{date}] {title}",
+
+        "#": "Overrides the default amount of time to sleep when loading pages and downloading files",
+        "webpage_sleep": 1.0,
+        "download_sleep": 2.0
+    },
 
     "transfur":
     {

@@ -7,6 +7,7 @@ import python_print_tools.printer
 import metadata_magic.file_tools as mm_file_tools
 from gallery_dvk.extractor.docslab import DocsLab
 from gallery_dvk.extractor.kemonocafe import KemonoCafe
+from gallery_dvk.extractor.tgcomics import TGComics
 from gallery_dvk.extractor.transfur import Transfur
 from gallery_dvk.extractor.webtoon import Webtoon
 from os.path import abspath, exists
@@ -23,7 +24,7 @@ class GalleryDVK():
         Setup for when GallerDVK is opened.
         Create an object for each Extractor.
         """
-        self.extractors = [DocsLab(), KemonoCafe(), Transfur(), Webtoon()]
+        self.extractors = [DocsLab(), KemonoCafe(), Transfur(), TGComics(), Webtoon()]
         return self
         
     def __exit__(self, *args):

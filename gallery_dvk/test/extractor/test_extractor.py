@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import os
+import re
+import bs4
 import metadata_magic.file_tools as mm_file_tools
 import gallery_dvk.extractor.extractor as gd_extractor
 from gallery_dvk.extractor.extractor import Extractor
@@ -82,6 +84,98 @@ def test_get_date():
     assert gd_extractor.get_date(" 2020/10/15 ", date_order="ymd") == "2020-10-15"
     assert gd_extractor.get_date("12 2021-11-07 thing", date_order="ymd") == "2021-11-07"
     assert gd_extractor.get_date("thing 2021-12-06 10", date_order="ymd") == "2021-12-06"
+
+def test_get_elements_with_string():
+    """
+    Tests the get_elements_with_string function.
+    """
+    # Test finding exact string in one element
+    html = "<p>[Just a Test]</p>"
+    bs = bs4.BeautifulSoup(html, features="lxml").find("p")
+    assert gd_extractor.get_elements_with_string(bs, "Test") == []
+    elements = gd_extractor.get_elements_with_string(bs, "[Just a Test]")
+    assert len(elements) == 1
+    assert str(elements[0]) == "<p>[Just a Test]</p>"
+    # Test finding exact string in multiple elements
+    html = "<p>Something</p><p>Other</p><p>Something</p>"
+    input_elements = bs4.BeautifulSoup(html, features="lxml").find_all("p")
+    assert gd_extractor.get_elements_with_string(input_elements, "blah") == []
+    assert gd_extractor.get_elements_with_string(input_elements, "something") == []
+    elements = gd_extractor.get_elements_with_string(input_elements, "Something")
+    assert len(elements) == 2
+    assert str(elements[0]) == "<p>Something</p>"
+    assert str(elements[1]) == "<p>Something</p>"
+    # Test finding exact string in child elements
+    html = "<div><b>Thing</b>More</div><div><span><i>Thing</i>Other</span></div>"
+    input_elements = bs4.BeautifulSoup(html, features="lxml").find_all("div")
+    assert gd_extractor.get_elements_with_string(input_elements, "Thing") == []
+    elements = gd_extractor.get_elements_with_string(input_elements, "Thing", children=True)
+    assert len(elements) == 2
+    assert str(elements[0]) == "<b>Thing</b>"
+    assert str(elements[1]) == "<i>Thing</i>"
+    bs = bs4.BeautifulSoup(html, features="lxml")
+    elements = gd_extractor.get_elements_with_string(bs, "Thing", children=True)
+    assert len(elements) == 2
+    assert str(elements[0]) == "<b>Thing</b>"
+    assert str(elements[1]) == "<i>Thing</i>"
+    # Test finding regex string in one element
+    html = "<p>Just a test</p>"
+    bs = bs4.BeautifulSoup(html, features="lxml").find("p")
+    assert gd_extractor.get_elements_with_string(bs, re.compile("[0-9]")) == []
+    elements = gd_extractor.get_elements_with_string(bs, re.compile(r"[Jj]ust\s"))
+    assert len(elements) == 1
+    assert str(elements[0]) == "<p>Just a test</p>"
+    # Test finding regex string in multiple elements
+    html = "<p>Something</p><p>Other 123</p><p>something else</p>"
+    input_elements = bs4.BeautifulSoup(html, features="lxml").find_all("p")
+    assert gd_extractor.get_elements_with_string(input_elements, re.compile("^thing")) == []
+    assert gd_extractor.get_elements_with_string(input_elements, re.compile(r"[a-z]\?")) == []
+    elements = gd_extractor.get_elements_with_string(input_elements, re.compile("^.+thing"))
+    assert len(elements) == 2
+    assert str(elements[0]) == "<p>Something</p>"
+    assert str(elements[1]) == "<p>something else</p>"
+    # Test finding regex string in child elements
+    html = "<body><div><b>Thing</b>More</div><div><span><i>Thing</i>Other</span></div></body>"
+    input_elements = bs4.BeautifulSoup(html, features="lxml").find_all("div")
+    assert gd_extractor.get_elements_with_string(input_elements, re.compile("Thing$")) == []
+    elements = gd_extractor.get_elements_with_string(input_elements, re.compile("Thing$"), children=True)
+    assert len(elements) == 2
+    assert str(elements[0]) == "<b>Thing</b>"
+    assert str(elements[1]) == "<i>Thing</i>"
+    bs = bs4.BeautifulSoup(html, features="lxml").find("body")
+    elements = gd_extractor.get_elements_with_string(bs, re.compile("Thing"), children=True)
+    assert len(elements) == 6
+    assert str(elements[0]) == "<body><div><b>Thing</b>More</div><div><span><i>Thing</i>Other</span></div></body>"
+    assert str(elements[1]) == "<div><b>Thing</b>More</div>"
+    assert str(elements[2]) == "<b>Thing</b>"
+    assert str(elements[3]) == "<div><span><i>Thing</i>Other</span></div>"
+    assert str(elements[4]) == "<span><i>Thing</i>Other</span>"
+    assert str(elements[5]) == "<i>Thing</i>"
+    html = "<p>Thing <b>Other</b></p>"
+    bs = bs4.BeautifulSoup(html, features="lxml").find("p")
+    elements = gd_extractor.get_elements_with_string(bs, re.compile("Other"))
+    assert len(elements) == 1
+    assert str(elements[0]) == "<p>Thing <b>Other</b></p>"
+
+def test_get_element_with_string():
+    """
+    Tests the get_element_with_string function.
+    """
+    # Test without children
+    html = "<p>Thing<span>Testing</span></p><p>Testing</p>"
+    input_elements = bs4.BeautifulSoup(html, features="lxml").find_all("p")
+    element = gd_extractor.get_element_with_string(input_elements, "Testing")
+    assert str(element) == "<p>Testing</p>"
+    element = gd_extractor.get_element_with_string(input_elements, re.compile("ting"))
+    assert str(element) == "<p>Thing<span>Testing</span></p>"
+    # Test with children
+    element = gd_extractor.get_element_with_string(input_elements, "Testing", children=True)
+    assert str(element) == "<span>Testing</span>"
+    element = gd_extractor.get_element_with_string(input_elements, re.compile("^Testing"), children=True)
+    assert str(element) == "<span>Testing</span>"
+    # Test with no matches
+    assert gd_extractor.get_element_with_string(input_elements, "blah") is None
+    assert gd_extractor.get_element_with_string(input_elements, re.compile("a"), children=True) is None
 
 def test_get_id():
     """

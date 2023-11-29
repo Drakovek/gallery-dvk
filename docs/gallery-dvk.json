@@ -18,6 +18,16 @@
         "webpage_sleep": 1.5,
         "download_sleep": 1.5
     },
+    "tgcomics":
+    {
+        "metadata": false,
+        "archive": null,
+        "username": null,
+        "password": null,
+        "filename_format": "{title}",
+        "webpage_sleep": 1.5,
+        "download_sleep": 1.5
+    },
     "transfur":
     {
         "metadata": false,

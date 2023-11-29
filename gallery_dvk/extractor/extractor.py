@@ -126,6 +126,60 @@ def get_category_value(config:dict, category:str, key:str, value_type, default):
         except (AssertionError, KeyError):
             return default
 
+def get_elements_with_string(elements, string, children:bool=False) -> List[bs4.BeautifulSoup]:
+    """
+    Finds elements within given BeautifulSoup object(s) that contain the given text.
+    
+    :param elements: BeautifulSoup object or list of BeautifulSoup obects to search for text within
+    :type elements: bs4.BeautifulSoup/List[bs4.BeautifulSoup], required
+    :param string: Either exact string to check for or a re.Pattern object to match against
+    :type string: str/re.Pattern, required
+    :param children: Whether to search for children of the given elements, defaults to False
+    :type children: bool, optional
+    :return: List of BeautifulSoup objects that contain the given text
+    :rtype: List[bs4.BeautifulSoup]
+    """
+    # Run through all elements if the elements are a list
+    matching = []
+    if isinstance(elements, list):
+        for element in elements:
+            matching.extend(get_elements_with_string(element, string, children))
+        return matching
+    # Get the regex to match
+    regex = string
+    if not isinstance(string, re.Pattern):
+        regex = re.escape(string)
+        regex = re.compile(f"^{regex}$")
+    # Check if the current element contains the given text
+    if not isinstance(elements, bs4.NavigableString) and regex.search(elements.get_text()) is not None:
+        matching.append(elements)
+    # Check for children
+    if children:
+        try:
+            child_elements = get_elements_with_string(elements.contents, string, children)
+            matching.extend(child_elements)
+        except AttributeError: pass
+    return matching
+
+def get_element_with_string(elements, string, children:bool=False) -> bs4.BeautifulSoup:
+    """
+    Finds the first element within given BeautifulSoup object(s) that contain the given text.
+    If no element with matching text can be found, None is returned
+    
+    :param elements: BeautifulSoup object or list of BeautifulSoup obects to search for text within
+    :type elements: bs4.BeautifulSoup/List[bs4.BeautifulSoup], required
+    :param string: Either exact string to check for or a re.Pattern object to match against
+    :type string: str/re.Pattern, required
+    :param children: Whether to search for children of the given elements, defaults to False
+    :type children: bool, optional
+    :return: BeautifulSoup object that contains the given text
+    :rtype: bs4.BeautifulSoup
+    """
+    results = get_elements_with_string(elements, string, children)
+    if len(results) > 0:
+        return results[0]
+    return None
+
 class Extractor:
     def __init__(self, category:str, config_paths:List[str]=gallery_dvk.config.get_default_config_paths()):
         """
