@@ -73,4 +73,5 @@ cython_debug/
 
 # Files added by OS
 *.DS_STORE
+*.DS_Store
 *._*

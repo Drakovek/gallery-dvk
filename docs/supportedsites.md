@@ -6,6 +6,6 @@ Most of these sites contain NSFW content, and you should assume so unless you kn
 | --- | --- | --- | --- |
 | Doc's Lab | [https://www.docs-lab.com](https://www.docs-lab.com) | Submissions, User Profiles | |
 | Kemono Café | [https://kemono.cafe](https://kemono.cafe) | Comics, Comic Pages | |
-| TGComics | [https://tgcomics.com](https://tgcomics.com) | Comics, Vignettes, Story Panels, Portfolios, Galleries | Username & Password |
+| TGComics | [https://tgcomics.com](https://tgcomics.com) | Comics, Vignettes, Story Panels, Portfolios, Galleries, Videos | Username & Password |
 | Transfur | [https://www.transfur.com](https://www.transfur.com) | Submissions, Galleries, Sketches, Favorites, Tags, User Profiles | Username & Password |
 | Webtoon | [https://www.webtoons.com/](https://www.webtoons.com/en/) | Webtoons, Episodes | |

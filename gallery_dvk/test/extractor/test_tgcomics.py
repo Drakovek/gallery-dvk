@@ -77,8 +77,8 @@ def get_categories_test(tgcomics:TGComics):
     bs = tgcomics.web_get("https://tgcomics.com/tgc/stories/reflections/")
     info = tgcomics.get_categories(bs)
     assert info["title"] == "Reflections"
-    assert info["artist"] == "Darkoshen"
-    assert info["author"] == "Bill Hart"
+    assert info["artists"] == ["Darkoshen"]
+    assert info["authors"] == ["Bill Hart"]
     assert info["age_rating"] == "TGC-R"
     assert info["genres"] == ["Magic"]
     assert info["sexual_preferences"] == ["Post-Hetero", "Pre-Hetero"]
@@ -92,8 +92,8 @@ def get_categories_test(tgcomics:TGComics):
     bs = tgcomics.web_get("https://tgcomics.com/tgc/comics/raans-doll/")
     info = tgcomics.get_categories(bs)
     assert info["title"] == "Raan’s Doll"
-    assert info["artist"] == "Kannel"
-    assert info["author"] is None
+    assert info["artists"] == ["Kannel"]
+    assert info["authors"] is None
     assert info["age_rating"] == "TGC-R"
     assert info["genres"] == ["Romance", "Slice of Life"]
     assert info["sexual_preferences"] == ["Post-Unsure", "Pre-Hetero"]
@@ -101,12 +101,25 @@ def get_categories_test(tgcomics:TGComics):
     assert info["transformation_details"] == ["Female Domination"]
     assert info["status"] == "Ongoing - Updated sporadically"
     assert info["date"] == "2021-08-21"
+    # Test with multiple artists
+    bs = tgcomics.web_get("https://tgcomics.com/tgc/comics/angelas-trick-n-treat-2020/")
+    info = tgcomics.get_categories(bs)
+    assert info["title"] == "Angela’s Tyler’s Trick ’n Treat (2020 Edition)"
+    assert info["artists"] == ["TGTrinity", "NotZackforWork"]
+    assert info["authors"] is None
+    assert info["age_rating"] is None
+    assert info["genres"] is None
+    assert info["sexual_preferences"] is None
+    assert info["transformations"] is None
+    assert info["transformation_details"] is None
+    assert info["status"] is None
+    assert info["date"] == "2020-10-31"
     # Test getting category info from a page that doesn't have it
     bs = tgcomics.web_get("https://tgcomics.com/tgc/comics/")
     info = tgcomics.get_categories(bs)
     assert info["title"] == "Comics"
-    assert info["artist"] is None
-    assert info["author"] is None
+    assert info["artists"] is None
+    assert info["authors"] is None
     assert info["age_rating"] is None
     assert info["genres"] is None
     assert info["sexual_preferences"] is None
@@ -117,8 +130,8 @@ def get_categories_test(tgcomics:TGComics):
     bs = tgcomics.web_get("https://tgcomics.com/tgc/")
     info = tgcomics.get_categories(bs)
     assert info["title"] is None
-    assert info["artist"] is None
-    assert info["author"] is None
+    assert info["artists"] is None
+    assert info["authors"] is None
     assert info["age_rating"] is None
     assert info["genres"] is None
     assert info["sexual_preferences"] is None
@@ -156,8 +169,8 @@ def get_pages_from_collection_test(tgcomics:TGComics):
     assert pages[0]["page_url"] == "vignettes/out-of-town/out-of-town-part-1"
     assert pages[0]["collection_description"] is None
     assert pages[0]["title"] == "Out of Town"
-    assert pages[0]["artist"] == "Kittyhawk"
-    assert pages[0]["author"] == "Ankan"
+    assert pages[0]["artists"] == ["Kittyhawk"]
+    assert pages[0]["authors"] == ["Ankan"]
     assert pages[0]["age_rating"] == "TGC-X"
     assert pages[0]["genres"] == ["Humor"]
     assert pages[0]["transformations"] == ["Full XX Change",
@@ -185,8 +198,8 @@ def get_pages_from_collection_test(tgcomics:TGComics):
     assert pages[0]["page_url"] == "comics/raans-doll/raans-doll-chapter-1"
     assert pages[0]["collection_description"] == "Test Description"
     assert pages[0]["title"] == "Raan’s Doll"
-    assert pages[0]["artist"] == "Kannel"
-    assert pages[0]["author"] is None
+    assert pages[0]["artists"] == ["Kannel"]
+    assert pages[0]["authors"] is None
     assert pages[0]["age_rating"] == "TGC-R"
     assert pages[0]["genres"] == ["Romance", "Slice of Life"]
     assert pages[0]["transformations"] == ["Crossdressing and TV", "Partial Transformation", "Slow Transformation"]
@@ -206,8 +219,8 @@ def get_pages_from_collection_test(tgcomics:TGComics):
     assert pages[0]["page_url"] == "stories/second-sight/second-sight-chapter-1"
     assert pages[0]["collection_description"] is None
     assert pages[0]["title"] == "Second Sight"
-    assert pages[0]["artist"] == "Darkoshen"
-    assert pages[0]["author"] == "Lilac Wren"
+    assert pages[0]["artists"] == ["Darkoshen"]
+    assert pages[0]["authors"] == ["Lilac Wren"]
     assert pages[0]["age_rating"] == "TGC-R"
     assert pages[0]["genres"] == ["Supernatural"]
     assert pages[0]["transformations"] == ["Full XX Change", "Instant Transformation", "Male-to-Female Transformation"]
@@ -228,8 +241,8 @@ def get_pages_from_collection_test(tgcomics:TGComics):
     assert pages[0]["page_url"] == "comics/the-heel/the-heel-chapter-1"
     assert pages[0]["collection_description"] is None
     assert pages[0]["title"] == "The Heel"
-    assert pages[0]["artist"] == "Kannel"
-    assert pages[0]["author"] is None
+    assert pages[0]["artists"] == ["Kannel"]
+    assert pages[0]["authors"] is None
     assert pages[0]["age_rating"] == "TGC-M"
     assert pages[0]["genres"] == ["Adventure", "Humor"]
     assert pages[0]["transformations"] == ["Chemical Transformation", "Full XX Change",
@@ -244,28 +257,52 @@ def get_pages_from_collection_test(tgcomics:TGComics):
     assert pages[2]["page_url"] == "comics/the-heel/the-heel-chapter-3"
     assert pages[3]["page_url"] == "comics/the-heel/the-heel-chapter-4"
     assert pages[4]["page_url"] == "comics/the-heel/the-heel-chapter-5xxx"
-    # Test if the page is not a gallery page
-    pages = tgcomics.get_pages_from_collection("kittyhawk-vignettes", {"collection_description":"Thing"})
-    assert len(pages) == 7
+    # Test if the page is an image page
+    pages = tgcomics.get_pages_from_collection("out-of-town-part-2", {"collection_description":"Thing"})
+    assert len(pages) == 9
     assert pages[0]["collection_description"] == "Thing"
-    assert pages[0]["artist"] == "Kittyhawk"
-    assert pages[0]["author"] is None
-    assert pages[0]["date"] == "2014-04-06"
-    assert pages[0]["age_rating"] == "TGC-R"
-    assert pages[0]["genres"] == ["Humor"]
-    assert pages[0]["transformations"] == ["Bodyswap", "Female-to-Male Transformation",
-            "Instant Transformation", "Male-to-Female Transformation", "Multiple Transformations",
-            "Non-human Transformation"]
+    assert pages[0]["artists"] == ["Kittyhawk"]
+    assert pages[0]["authors"] == ["Ankan"]
+    assert pages[0]["date"] == "2014-10-04"
+    assert pages[0]["age_rating"] is None
+    assert pages[0]["genres"] is None
+    assert pages[0]["transformations"] is None
     assert pages[0]["transformation_details"] is None
     assert pages[0]["sexual_preferences"] is None
     assert pages[0]["status"] is None
-    assert pages[0]["page_url"] == "https://tgcomics.com/tgc/vignettes/kittyhawk-vignettes/"
-    assert pages[0]["title"] == "Kittyhawk’s Vignettes [Casino]"
-    assert pages[0]["url"] == "https://tgcontent.tgcomics.com/story-panels/kittyhawk-panels/kittyhawk-casino.jpg"
+    assert pages[0]["page_url"] == "https://tgcomics.com/tgc/vignettes/out-of-town/out-of-town-part-2/"
+    assert pages[0]["title"] == "Out of Town – Part Two [Page 1]"
+    assert pages[0]["url"] == "https://tgcontent.tgcomics.com/vignettes/out-of-town/out-of-town2/out-of-town2-01.jpg"
     assert pages[0]["description"] == "Thing"
-    assert pages[6]["title"] == "Kittyhawk’s Vignettes [Jugs]"
-    assert pages[6]["url"] == "https://tgcontent.tgcomics.com/story-panels/kittyhawk-panels/kittyhawk-jugs.jpg"
-    assert pages[6]["description"] == "Thing"
+    assert pages[6]["title"] == "Out of Town – Part Two [Page 7]"
+    assert pages[6]["url"] == "https://tgcontent.tgcomics.com/vignettes/out-of-town/out-of-town2/out-of-town2-07.jpg"
+    assert pages[6]["description"] == "<span class=\"cont\">To be continued...?</span>"
+    assert pages[7]["title"] == "Out of Town – Part Two [PDF]"
+    assert pages[7]["url"] == "https://tgcontent.tgcomics.com/vignettes/out-of-town/out-of-town2/out-of-town2.pdf"
+    assert pages[7]["description"] == "Thing"
+    assert pages[8]["title"] == "Out of Town – Part Two [ZIP]"
+    assert pages[8]["url"] == "https://tgcontent.tgcomics.com/vignettes/out-of-town/out-of-town2/out-of-town2.zip"
+    assert pages[8]["description"] == "Thing"
+    # Test if the page is a video page
+    pages = tgcomics.get_pages_from_collection("videos/peephole", {"collection_description":"Another"})
+    assert len(pages) == 1
+    assert pages[0]["collection_description"] == "Another"
+    assert pages[0]["artists"] == ["TGedNathan"]
+    assert pages[0]["authors"] is None
+    assert pages[0]["date"] == "2022-10-12"
+    assert pages[0]["age_rating"] == "TGC-R"
+    assert pages[0]["genres"] ==  ["Magic"]
+    assert pages[0]["transformations"] == ["Magical Transformation", "Male-to-Female Transformation"]
+    assert pages[0]["transformation_details"] == ["Transformation as Punishment"]
+    assert pages[0]["sexual_preferences"] == ["Post-Unsure", "Pre-Hetero"]
+    assert pages[0]["status"] == "Complete"
+    assert pages[0]["page_url"] == "https://tgcomics.com/tgc/videos/peephole/"
+    assert pages[0]["title"] == "Peephole"
+    assert pages[0]["url"] == "https://tgcontent.tgcomics.com/videos/peephole/peephole.mp4"
+    assert pages[0]["description"] == "Another"
+    # Test with non-purchased premium comic
+    bs = tgcomics.web_get("https://tgcomics.com/tgc/premium-preview/perfect-heist-preview/")
+    assert tgcomics.get_image_pages(bs) == []
 
 def test_get_cover_page():
     """
@@ -274,10 +311,10 @@ def test_get_cover_page():
     # Test converting cover information to image information
     input_page = dict()
     input_page["page_url"] = "comics/the-heel/the-heel-chapter-1"
-    input_page["collection_description"] = None
+    input_page["collection_description"] = "Something"
     input_page["title"] = "The Heel"
-    input_page["artist"] = "Kannel"
-    input_page["author"] = None
+    input_page["artists"] = ["Kannel"]
+    input_page["authors"] = None
     input_page["age_rating"] = "TGC-M"
     input_page["genres"] = ["Adventure", "Humor"]
     input_page["status"] = "Complete"
@@ -285,10 +322,11 @@ def test_get_cover_page():
     input_page["cover_image"] = "https://tgcontent.tgcomics.com/comics/the-heel/the-heel-cover.jpg"
     input_page["cover_page"] = "comics/the-heel"
     output_page = gallery_dvk.extractor.tgcomics.get_cover_page(input_page)
-    assert output_page["collection_description"] is None
+    assert output_page["collection_description"] == "Something"
+    assert output_page["description"] == "Something"
     assert output_page["title"] == "The Heel"
-    assert output_page["artist"] == "Kannel"
-    assert output_page["author"] == None
+    assert output_page["artists"] == ["Kannel"]
+    assert output_page["authors"] == None
     assert output_page["age_rating"] == "TGC-M"
     assert output_page["genres"] == ["Adventure", "Humor"]
     assert output_page["status"] == "Complete"
@@ -325,8 +363,8 @@ def get_image_pages_test(tgcomics:TGComics):
         assert pages[0]["cover_page"] == 1
     except KeyError:pass
     assert pages[0]["collection_description"] == "Thing"
-    assert pages[0]["artist"] == "Kittyhawk"
-    assert pages[0]["author"] == "Ankan"
+    assert pages[0]["artists"] == ["Kittyhawk"]
+    assert pages[0]["authors"] == ["Ankan"]
     assert pages[0]["description"] == "Thing"
     assert pages[0]["transformations"] == ["testing"]
     assert pages[0]["genres"] is None
@@ -349,7 +387,7 @@ def get_image_pages_test(tgcomics:TGComics):
     assert pages[4]["id"] == "out-of-town1-05.jpg"
     assert pages[5]["title"] == "Out of Town – Part One [Page 6]"
     assert pages[5]["url"] == "https://tgcontent.tgcomics.com/vignettes/out-of-town/out-of-town1/out-of-town1-06.jpg"
-    assert pages[5]["id"] == "out-of-town1-06.jpg"
+    assert pages[5]["id"] == "out-of-town1-06.jpg"    
     # Test getting a large amount of pages
     tgcomics.cookies_to_header()
     bs = tgcomics.web_get("https://tgcomics.com/tgc/comics/open-trade/")
@@ -358,8 +396,8 @@ def get_image_pages_test(tgcomics:TGComics):
     length = len(pages)
     assert length > 175
     assert pages[0]["collection_description"] is None
-    assert pages[0]["artist"] == "Roseleaf"
-    assert pages[0]["author"] is None
+    assert pages[0]["artists"] == ["Roseleaf"]
+    assert pages[0]["authors"] is None
     assert pages[0]["description"] is None
     assert pages[0]["date"] is not None
     assert pages[0]["age_rating"] == "TGC-R"
@@ -374,9 +412,9 @@ def get_image_pages_test(tgcomics:TGComics):
     assert pages[0]["title"] == "Open Trade [Page 1]"
     assert pages[0]["url"] == "https://tgcontent.tgcomics.com/comics/open-trade/open-trade-001.jpg"
     assert pages[0]["id"] == "open-trade-001.jpg"
-    assert pages[length-1]["title"] == "Open Trade [Patreon]"
-    assert pages[length-1]["url"] == "https://tgcontent.tgcomics.com/comics/open-trade/open-trade-patreon-202311.jpg"
-    assert pages[length-1]["id"] == "open-trade-patreon-202311.jpg"
+    assert pages[175]["title"] == "Open Trade [Page 176]"
+    assert pages[175]["url"] == "https://tgcontent.tgcomics.com/comics/open-trade/open-trade-176.jpg"
+    assert pages[175]["id"] == "open-trade-176.jpg"
     # Test getting pages with added titles and descriptions
     tgcomics.cookies_to_header()
     bs = tgcomics.web_get("https://tgcomics.com/tgc/notzackforwork-portfolio")
@@ -384,8 +422,8 @@ def get_image_pages_test(tgcomics:TGComics):
     pages = tgcomics.get_image_pages(bs, metadata)
     assert len(pages) == 26
     assert pages[0]["collection_description"] == "Thing"
-    assert pages[0]["artist"] == "NotZackforWork"
-    assert pages[0]["author"] is None
+    assert pages[0]["artists"] == ["NotZackforWork"]
+    assert pages[0]["authors"] is None
     assert pages[0]["date"] == "2020-09-21"
     assert pages[0]["age_rating"] is None
     assert pages[0]["genres"] is None
@@ -421,6 +459,140 @@ def get_image_pages_test(tgcomics:TGComics):
     bs = tgcomics.web_get("https://tgcomics.com/tgc/premium-preview/perfect-heist-preview/")
     assert tgcomics.get_image_pages(bs) == []
 
+def get_video_page_test(tgcomics:TGComics):
+    """
+    Tests the get_video_page method.
+    Must be logged in to TGComics.com to work.
+    
+    :param tgcomics: TGComics extractor object, logged in to TGComics.com
+    :type: TGComics, required
+    """
+    tgcomics.initialize()
+    tgcomics.cookies_to_header()
+    # Test getting video with no description
+    bs = tgcomics.web_get("https://tgcomics.com/tgc/videos/cchimeras-powerful-knead/")
+    metadata = {"collection_description":"Desc", "transformations":["testing"], "cover_page":None}
+    page = tgcomics.get_video_page(bs, metadata)
+    try:
+        assert page["cover_image"] == 1
+    except KeyError:pass
+    try:
+        assert page["cover_page"] == 1
+    except KeyError:pass
+    assert page["collection_description"] == "Desc"
+    assert page["description"] == "Desc"
+    assert page["artists"] == ["Cchimeras"]
+    assert page["authors"] is None
+    assert page["age_rating"] is None
+    assert page["transformations"] == ["testing"]
+    assert page["genres"] is None
+    assert page["date"] == "2023-02-20"
+    assert page["status"] is None
+    assert page["page_url"] == "https://tgcomics.com/tgc/videos/cchimeras-transformations/cchimeras-powerful-knead/"
+    assert page["title"] == "A Powerful Knead"
+    assert page["url"] == "https://tgcontent.tgcomics.com/videos/cchimeras/cchimeras-transformations-powerful-knead.mp4"
+    assert page["id"] == "cchimeras-transformations-powerful-knead.mp4"
+    # Test getting video with description
+    bs = tgcomics.web_get("https://tgcomics.com/tgc/swap-io/")
+    metadata = {"transformations":["testing"], "cover_image":None, "cover_page":None}
+    page = tgcomics.get_video_page(bs, metadata)
+    try:
+        assert page["cover_image"] == 1
+    except KeyError:pass
+    try:
+        assert page["cover_page"] == 1
+    except KeyError:pass
+    assert page["collection_description"] is None
+    assert page["description"] is None
+    assert page["artists"] == ["TGedNathan"]
+    assert page["authors"] == None
+    assert page["age_rating"] == "TGC-C"
+    assert page["transformations"] == ["Female-to-Male Transformation", "Future Science Transformation",
+            "Male-to-Female Transformation", "Multiple Transformations"]
+    assert page["genres"] == ["Science Fiction"]
+    assert page["date"] == "2022-12-31"
+    assert page["status"] == "Complete"
+    assert page["page_url"] == "https://tgcomics.com/tgc/videos/swap-io/"
+    assert page["title"] == "Swap IO"
+    assert page["url"] == "https://tgcontent.tgcomics.com/videos/swap-io/swap-io.mp4"
+    assert page["id"] == "swap-io.mp4"
+    # Test getting a non-video page
+    bs = tgcomics.web_get("https://tgcomics.com/tgc/vignettes/st-patricks-day-miracle/")
+    assert tgcomics.get_video_page(bs, {}) is None
+    bs = tgcomics.web_get("https://tgcomics.com/tgc/")
+    assert tgcomics.get_video_page(bs, {}) is None
+
+def get_archive_pages_test(tgcomics:TGComics):
+    """
+    Tests the get_archive_pages method.
+    Must be logged in to TGComics.com to work.
+    
+    :param tgcomics: TGComics extractor object, logged in to TGComics.com
+    :type: TGComics, required
+    """
+    # Test getting page with both a PDF and a ZIP archive
+    tgcomics.initialize()
+    tgcomics.cookies_to_header()
+    bs = tgcomics.web_get("https://tgcomics.com/tgc/out-of-town-part-1")
+    metadata = {"collection_description":"Thing", "transformations":["Different"], "cover_image":None, "cover_page":None}
+    pages = tgcomics.get_archive_pages(bs, metadata)
+    assert len(pages) == 2
+    try:
+        assert pages[0]["cover_image"] == 1
+    except KeyError:pass
+    try:
+        assert pages[0]["cover_page"] == 1
+    except KeyError:pass
+    assert pages[0]["collection_description"] == "Thing"
+    assert pages[0]["artists"] == ["Kittyhawk"]
+    assert pages[0]["authors"] == ["Ankan"]
+    assert pages[0]["description"] == "Thing"
+    assert pages[0]["transformations"] == ["Different"]
+    assert pages[0]["genres"] is None
+    assert pages[0]["date"] == "2014-05-03"
+    assert pages[0]["page_url"] == "https://tgcomics.com/tgc/vignettes/out-of-town/out-of-town-part-1/"
+    assert pages[0]["title"] == "Out of Town – Part One [PDF]"
+    assert pages[0]["url"] == "https://tgcontent.tgcomics.com/vignettes/out-of-town/out-of-town1/out-of-town1.pdf"
+    assert pages[0]["id"] == "out-of-town1.pdf"
+    assert pages[1]["collection_description"] == "Thing"
+    assert pages[1]["artists"] == ["Kittyhawk"]
+    assert pages[1]["authors"] == ["Ankan"]
+    assert pages[1]["description"] == "Thing"
+    assert pages[1]["transformations"] == ["Different"]
+    assert pages[1]["genres"] is None
+    assert pages[1]["date"] == "2014-05-03"
+    assert pages[1]["page_url"] == "https://tgcomics.com/tgc/vignettes/out-of-town/out-of-town-part-1/"
+    assert pages[1]["title"] == "Out of Town – Part One [ZIP]"
+    assert pages[1]["url"] == "https://tgcontent.tgcomics.com/vignettes/out-of-town/out-of-town1/out-of-town1.zip"
+    assert pages[1]["id"] == "out-of-town1.zip"
+    # Test getting page with only PDF
+    bs = tgcomics.web_get("https://tgcomics.com/tgc/stories/reflections")
+    metadata = {"collection_description":"NEW"}
+    pages = tgcomics.get_archive_pages(bs, metadata)
+    assert len(pages) == 1
+    assert pages[0]["collection_description"] == "NEW"
+    assert pages[0]["artists"] == ["Darkoshen"]
+    assert pages[0]["authors"] == ["Bill Hart"]
+    assert pages[0]["age_rating"] == "TGC-R"
+    assert pages[0]["description"] == "NEW"
+    assert pages[0]["transformations"] == ["Full XX Change", "Instant Transformation",
+            "Magical Transformation", "Male-to-Female Transformation"]
+    assert pages[0]["transformation_details"] == ["Bad Boy to Good Girl", "Identity Death",
+            "Mental Reconditioning", "Process Shown", "Reality Alteration", "Witchcraft"]
+    assert pages[0]["sexual_preferences"] == ["Post-Hetero", "Pre-Hetero"]
+    assert pages[0]["genres"] == ["Magic"]
+    assert pages[0]["date"] == "2016-03-07"
+    assert pages[0]["status"] == "Complete"
+    assert pages[0]["page_url"] == "https://tgcomics.com/tgc/stories/reflections/"
+    assert pages[0]["title"] == "Reflections [PDF]"
+    assert pages[0]["url"] == "https://tgcontent.tgcomics.com/stories/reflections/reflections.pdf"
+    assert pages[0]["id"] == "reflections.pdf"
+    # Test getting page with no archives
+    bs = tgcomics.web_get("https://tgcomics.com/tgc/videos/cchimeras-transformations/cchimeras-reassembly-required/")
+    assert tgcomics.get_archive_pages(bs, metadata) == []
+    bs = tgcomics.web_get("https://tgcomics.com/tgc/")
+    assert tgcomics.get_archive_pages(bs, metadata) == []
+
 def download_page_test(tgcomics:TGComics, temp_dir:str):
     """
     Tests the download_pages method.
@@ -442,8 +614,8 @@ def download_page_test(tgcomics:TGComics, temp_dir:str):
     files = sorted(os.listdir(temp_dir)) == ["config.json", "tgcomics.db"]
     # Test if file has not been written
     json = {"title":"Out of Town [Page 2]"}
-    json["artist"] = "Kittyhawk"
-    json["author"] = "Ankan"
+    json["artists"] = ["Kittyhawk"]
+    json["authors"] = ["Ankan"]
     json["url"] = "https://tgcontent.tgcomics.com/vignettes/out-of-town/out-of-town1/out-of-town1-02.jpg"
     json["page_url"] = "https://tgcomics.com/tgc/vignettes/out-of-town/out-of-town-part-1/"
     media_file = tgcomics.download_page(json, temp_dir)
@@ -459,8 +631,8 @@ def download_page_test(tgcomics:TGComics, temp_dir:str):
     assert exists(json_file)
     meta = mm_file_tools.read_json_file(json_file)
     assert meta["title"] == "Out of Town [Page 2]"
-    assert meta["artist"] == "Kittyhawk"
-    assert meta["author"] == "Ankan"
+    assert meta["artists"] == ["Kittyhawk"]
+    assert meta["authors"] == ["Ankan"]
     assert meta["url"] == "https://tgcontent.tgcomics.com/vignettes/out-of-town/out-of-town1/out-of-town1-02.jpg"
     assert meta["page_url"] == "https://tgcomics.com/tgc/vignettes/out-of-town/out-of-town-part-1/"
     assert os.stat(media_file).st_size == 276099
@@ -492,9 +664,13 @@ def test_with_login():
         assert tgcomics.attempted_login
         # Test getting categories from a page
         get_categories_test(tgcomics)
-        # Test  pages from collection
-        get_pages_from_collection_test(tgcomics)
         # Test getting the image pages
         get_image_pages_test(tgcomics)
+        # Test getting the video page
+        get_video_page_test(tgcomics)
+        # Test getting the archive pages
+        get_archive_pages_test(tgcomics)
+        # Test pages from collection
+        get_pages_from_collection_test(tgcomics)
         # Test downloading pages
         download_page_test(tgcomics, temp_dir)

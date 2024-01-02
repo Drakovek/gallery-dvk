@@ -32,6 +32,7 @@ def get_cover_page(collection_page:dict) -> dict:
     image_page["page_url"] = f"https://tgcomics.com/tgc/{cover_page}/"
     image_page["cover_image"] = None
     image_page["cover_page"] = None
+    image_page["description"] = image_page["collection_description"]
     # Return the image page
     return image_page
 
@@ -120,12 +121,20 @@ class TGComics(gd_extractor.Extractor):
         except AttributeError: info["title"] = None
         # Get the author
         try:
-            info["author"] = entry_header.find("a", {"href":re.compile(r"\/tgc\/author\/")}).get_text().strip()
-        except AttributeError: info["author"] = None
+            authors = []
+            for author_element in entry_header.find_all("a", {"href":re.compile(r"\/tgc\/author\/")}):
+                authors.append(author_element.get_text().strip())
+            assert len(authors) > 0
+            info["authors"] = authors
+        except (AssertionError, AttributeError): info["authors"] = None
         # Get the artist
         try:
-            info["artist"] = entry_header.find("a", {"href":re.compile(r"\/tgc\/artist\/")}).get_text().strip()
-        except AttributeError: info["artist"] = None
+            artists = []
+            for artist_element in entry_header.find_all("a", {"href":re.compile(r"\/tgc\/artist\/")}):
+                artists.append(artist_element.get_text().strip())
+            assert len(artists) > 0
+            info["artists"] = artists
+        except (AssertionError, AttributeError): info["artists"] = None
         # Get the age rating
         strip_regex = r"^<[^>]*>|<\s*\/[^>]*>$|<\s*strong\s*>.+<\s*\/\s*strong\s*>"
         category_elements = None
@@ -247,7 +256,12 @@ class TGComics(gd_extractor.Extractor):
         except TypeError: pass
         # Try to get image pages if this is not a collection page
         if len(pages) == 0:
-            return self.get_image_pages(bs, metadata)
+            pages = self.get_image_pages(bs, metadata)
+            # Try to get video pages if this is not a collection or image page
+            if len(pages) == 0:
+                pages = [self.get_video_page(bs, metadata)]
+            # Get archive pages as well
+            pages.extend(self.get_archive_pages(bs, metadata))
         # Return pages
         return pages
     
@@ -313,6 +327,113 @@ class TGComics(gd_extractor.Extractor):
             pages.append(page)
         # Return the pages
         return pages
+
+    def get_archive_pages(self, beautiful_soup:bs4.BeautifulSoup, metadata:dict={}) -> List[dict]:
+        """
+        Returns a PDF and ZIP links of a piece of TGComics media, if available.
+
+        :param beautiful_soup: BeautifulSoup object containing parsed TGComics web page
+        :type beautiful_soup: bs4.BeautifulSoup
+        :param metadata: Existing metadata to use if metadata can't be found on the page
+        :type metadata: dict, optional
+        :return: List of dictionaries with media page and metadata info
+        :rtype: List[dict]
+        """
+        # Set the base metadata passed into the function
+        base_metadata = copy.deepcopy(metadata)
+        try:
+            assert base_metadata["collection_description"] is not None
+        except (AssertionError, KeyError): base_metadata["collection_description"] = None
+        try:
+            base_metadata.pop("cover_image")
+        except KeyError: pass
+        try:
+            base_metadata.pop("cover_page")
+        except KeyError: pass
+        base_metadata["description"] = base_metadata["collection_description"]
+        # Get the category information for the webpage
+        categories = self.get_categories(beautiful_soup)
+        for item in categories.items():
+            try:
+                assert item[1] is None
+                assert base_metadata[item[0]] is not None
+            except (AssertionError, KeyError):
+                base_metadata[item[0]] = item[1]
+        # Get the page url
+        try:
+            section = re.findall(self.section, beautiful_soup.find("link", {"rel":"canonical"})["href"])[0]
+            base_metadata["page_url"] = f"https://tgcomics.com/tgc/{section}/"
+        except IndexError: return []
+        # Get the PDF link
+        pages = []
+        try:
+            pdf_link = beautiful_soup.find("a", {"href":re.compile(r"tgcontent\.tgcomics\.com\/.+\.pdf$")})["href"]
+            pdf_page = copy.deepcopy(base_metadata)
+            pdf_page["title"] = f"{base_metadata['title']} [PDF]"
+            pdf_page["url"] = pdf_link
+            pdf_page["id"] = re.findall(r"(?<=\/)[^\/]+$", pdf_page["url"])[0]
+            pages.append(pdf_page)
+        except TypeError: pass
+        # Get the ZIP link
+        try:
+            zip_link = beautiful_soup.find("a", {"href":re.compile(r"tgcontent\.tgcomics\.com\/.+\.zip$")})["href"]
+            zip_page = copy.deepcopy(base_metadata)
+            zip_page["title"] = f"{base_metadata['title']} [ZIP]"
+            zip_page["url"] = zip_link
+            zip_page["id"] = re.findall(r"(?<=\/)[^\/]+$", zip_page["url"])[0]
+            pages.append(zip_page)
+        except TypeError: pass
+        # Return the archive pages
+        return pages
+        
+    
+    def get_video_page(self, beautiful_soup:bs4.BeautifulSoup, metadata:dict={}) -> dict:
+        """
+        Returns video page info on a TGComics.com media video page.
+
+        :param beautiful_soup: BeautifulSoup object containing parsed TGComics web page
+        :type beautiful_soup: bs4.BeautifulSoup
+        :param metadata: Existing metadata to use if metadata can't be found on the page
+        :type metadata: dict, optional
+        :return: Dictionaries with video page and metadata info
+        :rtype: dict
+        """
+        # Set the base metadata passed into the function
+        base_metadata = copy.deepcopy(metadata)
+        try:
+            assert base_metadata["collection_description"] is not None
+        except (AssertionError, KeyError): base_metadata["collection_description"] = None
+        # Get the category information for the webpage
+        categories = self.get_categories(beautiful_soup)
+        for item in categories.items():
+            try:
+                assert item[1] is None
+                assert base_metadata[item[0]] is not None
+            except (AssertionError, KeyError):
+                base_metadata[item[0]] = item[1]
+        # Get the page url
+        try:
+            section = re.findall(self.section, beautiful_soup.find("link", {"rel":"canonical"})["href"])[0]
+            base_metadata["page_url"] = f"https://tgcomics.com/tgc/{section}/"
+        except IndexError: return None
+        # Remove cover details
+        try:
+            base_metadata.pop("cover_image")
+        except KeyError: pass
+        try:
+            base_metadata.pop("cover_page")
+        except KeyError: pass
+        # Set the description
+        base_metadata["description"] = base_metadata["collection_description"]
+        # Get the video url
+        try:
+            video_element = beautiful_soup.find("video", {"id":"player"})
+            video_element = video_element.find("source")
+            base_metadata["url"] = video_element["src"]
+            base_metadata["id"] = re.findall(r"(?<=\/)[^\/]+$", base_metadata["url"])[0]
+            return base_metadata
+        except AttributeError:
+            return None
     
     def download_page(self, page:dict, directory:str) -> str:
         """
@@ -328,12 +449,12 @@ class TGComics(gd_extractor.Extractor):
         # Get the author/artist
         subs = []
         try:
-            assert page["author"] is not None
-            subs = [page["author"]]
+            assert page["authors"] is not None
+            subs = [page["authors"][0]]
         except (AssertionError, KeyError): pass
         try:
-            assert page["artist"] is not None
-            subs = [page["artist"]]
+            assert page["artists"] is not None
+            subs = [page["artists"][0]]
         except (AssertionError, KeyError): pass
         # Get the remaining subdirectory list from the page url
         section = re.findall(self.section, page["page_url"])[0]
