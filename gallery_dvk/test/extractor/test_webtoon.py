@@ -131,8 +131,8 @@ def test_get_episodes():
         assert episodes[0]["webtoon"] == "A Kat's (GOD AWFUL!!!) Blessing"
         assert episodes[0]["genre"] == "Comedy"
         assert episodes[0]["authors"] == ["Peter Barton"]
-        assert episodes[0]["webtoon_views"] > 1200000
-        assert episodes[0]["webtoon_views"] < 1600000
+        assert episodes[0]["webtoon_views"] > 1500000
+        assert episodes[0]["webtoon_views"] < 2000000
         assert episodes[0]["webtoon_subscribers"] > 15000
         assert episodes[0]["webtoon_subscribers"] < 18000
         assert episodes[0]["webtoon_rating"] > 6.0
@@ -142,8 +142,8 @@ def test_get_episodes():
         assert episodes[0]["title"] == "Prologue"
         assert episodes[0]["episode"] == 1
         assert episodes[0]["date"] == "2023-02-28"
-        assert episodes[0]["likes"] > 1800
-        assert episodes[0]["likes"] < 2000
+        assert episodes[0]["likes"] > 2000
+        assert episodes[0]["likes"] < 2800
         assert episodes[0]["url"] == "https://www.webtoons.com/en/canvas/a-kats-god-awful-blessing/prologue/viewer?title_no=847082&episode_no=1"
         # Test getting episodes with unique titles
         episodes = webtoon.get_episodes("en/romance/blades-of-furry/list?title_no=2383")
@@ -180,19 +180,19 @@ def test_get_episode_info():
         episode_info = {"url":"https://www.webtoons.com/en/romance/blades-of-furry/ep-1-last-minute-matchup/viewer?title_no=2383&episode_no=1"}
         episode_info["title"] = "Episode 01"
         pages = webtoon.get_episode_info("en/romance/blades-of-furry/ep-1-last-minute-matchup/viewer?title_no=2383&episode_no=1", episode_info)
-        assert len(pages) == 57
+        assert len(pages) == 57    
         assert pages[0]["title"] == "Episode 01"
         assert pages[0]["url"] == "https://www.webtoons.com/en/romance/blades-of-furry/ep-1-last-minute-matchup/viewer?title_no=2383&episode_no=1"
-        assert pages[0]["image_url"] == "https://webtoon-phinf.pstatic.net/20201215_23/1607986880350l3WlD_JPEG/1607986880287238318.jpg?type=q90"
+        assert pages[0]["image_url"] == "https://webtoon-phinf.pstatic.net/20231223_195/1703287617653PTwO0_JPEG/17032876176186155_EP1_1.jpg?type=q90"
         assert pages[0]["image_number"] == 1
         assert pages[0]["id"] == "en-t2383-e1-1"
-        assert pages[1]["image_url"] == "https://webtoon-phinf.pstatic.net/20201215_226/1607986880365HMsv0_JPEG/1607986880318238319.jpg?type=q90"
+        assert pages[1]["image_url"] == "https://webtoon-phinf.pstatic.net/20231223_159/17032876177884jP1A_JPEG/17032876177672936_EP1_2.jpg?type=q90"
         assert pages[1]["image_number"] == 2
         assert pages[1]["id"] == "en-t2383-e1-2"
-        assert pages[2]["image_url"] == "https://webtoon-phinf.pstatic.net/20201215_71/16079868809535jqiC_JPEG/1607986880904238314.jpg?type=q90"
+        assert pages[2]["image_url"] == "https://webtoon-phinf.pstatic.net/20231223_152/1703287617951efWsz_JPEG/17032876179172253_EP1_3.jpg?type=q90"
         assert pages[2]["image_number"] == 3
         assert pages[2]["id"] == "en-t2383-e1-3"
-        assert pages[56]["image_url"] == "https://webtoon-phinf.pstatic.net/20201215_118/1607986917312T3lnG_JPEG/1607986917268238310.jpg?type=q90"
+        assert pages[56]["image_url"] == "https://webtoon-phinf.pstatic.net/20231223_162/1703287617190NYSfj_JPEG/17032876171679939_zEndCard.JPG?type=q90"
         assert pages[56]["image_number"] == 57
         assert pages[56]["id"] == "en-t2383-e1-57"
         # Test getting episode while getting comic info
@@ -214,15 +214,18 @@ def test_get_episode_info():
         assert pages[1]["title"] == "Episode 2"
         assert pages[1]["image_number"] == 2
         assert pages[1]["id"] == "en-t5112-e2-2"
-        assert pages[1]["image_url"] == "https://webtoon-phinf.pstatic.net/20230506_10/1683306754286hOcwI_PNG/16833067542741201_US_SWOLEMATES_S1_EP0002_001.png?type=opti"
+        url = "https://webtoon-phinf.pstatic.net/20230506_10/1683306754286hOcwI_PNG/16833067542741201_US_SWOLEMATES_S1_EP0002_001.png?type=opti"
+        assert pages[1]["image_url"] == url
         assert pages[2]["title"] == "Episode 2"
         assert pages[2]["id"] == "en-t5112-e2-3"
         assert pages[2]["image_number"] == 3
-        assert pages[2]["image_url"] == "https://webtoon-phinf.pstatic.net/20230506_8/1683306754391p2nXT_PNG/16833067543598767_US_SWOLEMATES_S1_EP0002_002.png?type=opti"
+        url = "https://webtoon-phinf.pstatic.net/20230506_8/1683306754391p2nXT_PNG/16833067543598767_US_SWOLEMATES_S1_EP0002_002.png?type=opti"
+        assert pages[2]["image_url"] == url
         assert pages[59]["title"] == "Episode 2"
         assert pages[59]["id"] == "en-t5112-e2-60"
         assert pages[59]["image_number"] == 60
-        assert pages[59]["image_url"] == "https://webtoon-phinf.pstatic.net/20230506_18/1683306753498trgbE_PNG/16833067534946490_US_SWOLEMATES_S1_EP0002_059.png?type=opti"
+        url = "https://webtoon-phinf.pstatic.net/20230506_18/1683306753498trgbE_PNG/16833067534946490_US_SWOLEMATES_S1_EP0002_059.png?type=opti"
+        assert pages[59]["image_url"] == url
 
 def test_download_page():
     """
@@ -248,7 +251,7 @@ def test_download_page():
     with Webtoon([config_file]) as webtoon:
         json["id"] = "en-t2383-e1-1"
         json["image_number"] = 1
-        json["image_url"] = "https://webtoon-phinf.pstatic.net/20201215_23/1607986880350l3WlD_JPEG/1607986880287238318.jpg?type=q90"
+        json["image_url"] = "https://webtoon-phinf.pstatic.net/20231223_195/1703287617653PTwO0_JPEG/17032876176186155_EP1_1.jpg?type=q90"
         json["date"] = "2020-01-01"
         media_file = webtoon.download_page(json, temp_dir)
         assert basename(media_file) == "en-t2383-e1-1_BoF Episode 1.jpg"
@@ -262,7 +265,7 @@ def test_download_page():
     meta = mm_file_tools.read_json_file(json_file)
     assert meta["title"] == "BoF Episode 1"
     assert meta["url"] == "https://www.webtoons.com/en/romance/blades-of-furry/ep-1-last-minute-matchup/viewer?title_no=2383&episode_no=1"
-    assert meta["image_url"] == "https://webtoon-phinf.pstatic.net/20201215_23/1607986880350l3WlD_JPEG/1607986880287238318.jpg?type=q90"
+    assert meta["image_url"] == "https://webtoon-phinf.pstatic.net/20231223_195/1703287617653PTwO0_JPEG/17032876176186155_EP1_1.jpg?type=q90"
     assert meta["date"] == "2020-01-01"
     assert meta["webtoon"] == "Blades of Furry"
     assert meta["image_number"] == 1

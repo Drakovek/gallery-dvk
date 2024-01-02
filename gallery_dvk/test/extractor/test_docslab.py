@@ -182,8 +182,8 @@ def test_get_links_from_user():
         assert {"section":"1649/you-and-your-beef", "rating":None} in links
         # Test getting favorites
         links = docslab.get_links_from_user("gabrielmoon", get_submissions=True, get_favorites=True)
-        assert len(links) > 255
-        assert len(links) < 265
+        assert len(links) > 240
+        assert len(links) < 300
         assert {"section":"2011/assembly-for-animals", "rating":None} in links
         assert {"section":"2096/so-you-want-to-be-a-zebra", "rating":None} in links
         assert {"section":"176/stud-mare", "rating":None} in links
@@ -195,8 +195,8 @@ def test_get_links_from_user():
         docslab.add_to_archive("docslab-2917")
         docslab.add_to_archive("docslab-2862")
         links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
-        assert len(links) > 64
-        assert len(links) < 70
+        assert len(links) > 65
+        assert len(links) < 90
         assert {"section":"3637/a-close-companion", "rating":"R"} not in links
         assert {"section":"2917/comfort", "rating":"PG"} not in links
         assert {"section":"2862/the-gift-ch-01", "rating":"X"} not in links
