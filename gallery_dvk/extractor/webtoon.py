@@ -2,6 +2,7 @@
 
 import os
 import re
+import copy
 import math
 import operator
 import gallery_dvk.extractor.extractor
@@ -308,7 +309,7 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
             if media_file is not None:
                 media_files.append(media_file)
         # Stitch media files together, if specified
-        if self.stitch_images:
+        if self.stitch_images and len(media_files) > 0:
             images = []
             stitched = None
             for i in range(0, len(media_files)):
@@ -327,9 +328,7 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
                 else:
                     stitched = stitch_images(stitched, bottom_image)
             # Create the metadata for the stitched image
-            metadata = dict()
-            for item in pages[i].items():
-                metadata[item[0]] = item[1]
+            metadata = copy.deepcopy(pages[0])
             metadata["id"] = re.sub("-[0-9]+$", "", metadata["id"])
             metadata.pop("image_url")
             metadata.pop("image_number")
