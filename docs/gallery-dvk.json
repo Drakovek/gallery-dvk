@@ -18,6 +18,14 @@
         "webpage_sleep": 1.5,
         "download_sleep": 1.5
     },
+    "overflowingbra":
+    {
+        "metadata": false,
+        "archive": null,
+        "filename_format": "{title}",
+        "webpage_sleep": 3,
+        "download_sleep": 1.5
+    },
     "tgcomics":
     {
         "metadata": false,

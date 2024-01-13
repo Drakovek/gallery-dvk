@@ -190,7 +190,7 @@ def test_download_page():
         kemonocafe.add_to_archive("kemonocafe-addictivescience-page0001")
         media_file = kemonocafe.download_page(json, temp_dir)
         assert media_file is None
-    files = sorted(os.listdir(temp_dir)) == ["config.json", "transfur.db"]
+    assert sorted(os.listdir(temp_dir)) == ["config.json", "kemonocafe.db"]
     # Test if file has not been written
     with KemonoCafe([config_file]) as kemonocafe:
         json = {"title":"Page0002"}

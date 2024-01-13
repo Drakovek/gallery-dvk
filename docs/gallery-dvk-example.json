@@ -39,6 +39,22 @@
         "webpage_sleep": 3.0,
         "download_sleep": 3.0
     },
+
+    "overflowingbra":
+    {
+        "#": "Sets gallery-dvk to write JSON metadata for pages downloaded from OverflowingBra.com",
+        "metadata": true,
+
+        "#": "Defines the download archive for OverflowingBra extractor",
+        "archive": "/path/to/archive/",
+
+        "#": "Overrides the filename format",
+        "filename_format": "[{date}] {title}",
+
+        "#": "Overrides the default wait time for loading pages",
+        "webpage_sleep": 3,
+        "download_sleep": 1.5
+    },
     
     "tgcomics":
     {
