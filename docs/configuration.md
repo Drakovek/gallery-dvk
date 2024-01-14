@@ -80,7 +80,7 @@ The login credentials for the extractor. This is required to access locked conte
 
 If set to `null`, *gallery-dvk* will prompt the user for username and password if necessary.
 
-### \*.webpage_sleep & download_sleep
+### \*.sleep & sleep-request
 
 ***Type***
 + `number`
@@ -92,13 +92,13 @@ If set to `null`, *gallery-dvk* will prompt the user for username and password i
 
     website:
     {
-        "webpage_sleep": 1.0,
-        "download_sleep": 2.5
+        "sleep": 1.0,
+        "sleep-request": 2.5
     }
 
 ***Description***
 
-The amount of time to wait in seconds after loading a webpage and downloading a file, respectively. Increasing this wait time can reduce load on bandwidth and reduce the number of response errors.
+The amount of time to wait in seconds after downloading a file and loading a webpage, respectively. Increasing this wait time can reduce load on bandwidth and reduce the number of response errors.
 
 ## Extractor-Specific Options
 

@@ -82,9 +82,9 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
         """
         super().get_info_from_config(config, "webtoon")
         # Get whether to stitch images from an episode together
-        self.stitch_images = gallery_dvk.extractor.extractor.get_category_value(config, category, "stitch_images", bool, True)
+        self.stitch_images = gallery_dvk.extractor.extractor.get_category_value(config, category, "stitch_images", [bool], True)
         # Get whether to delete individual images if a stitched image is created
-        self.only_stitched = gallery_dvk.extractor.extractor.get_category_value(config, category, "only_stitched", bool, False)
+        self.only_stitched = gallery_dvk.extractor.extractor.get_category_value(config, category, "only_stitched", [bool], False)
     
     def get_id(self, url:str) -> str:
         """

@@ -101,7 +101,7 @@ def get_date(date_string:str, date_order:str=None) -> str:
     # Return a string for the year
     return f"{year}-{month}-{day}"
 
-def get_category_value(config:dict, category:str, key:str, value_type, default):
+def get_category_value(config:dict, category:str, key:str, value_types:List[str], default):
         """
         Returns the value of a given key in a given category in a config file.
         If key is missing or not of the correct value, the default value is returned.
@@ -112,19 +112,27 @@ def get_category_value(config:dict, category:str, key:str, value_type, default):
         :type category: str, required
         :param key: Key of the value to return
         :type key: str, requrired
-        :param value_type: Type of value the result must match
-        :type value_type: Any, required
+        :param value_types: Types of value the result can match
+        :type value_types: Any, required
         :param default: Value to return if the value of the key is invalid
         :type default: Any, required
         :return: Value of the given key
         :rtype: Any
         """
+        # Get the key value, if available
         try:
             value = config[category][key]
-            assert isinstance(value, value_type)
-            return value
-        except (AssertionError, KeyError):
-            return default
+        except KeyError:
+            try:
+                value = config["extractor"][category][key]
+            except KeyError:
+                return default
+        # Check if the value matches one of the value types
+        for value_type in value_types:
+            if isinstance(value, value_type):
+                return value
+        # Return the default value if not the right type
+        return default
 
 def get_elements_with_string(elements, string, children:bool=False) -> List[bs4.BeautifulSoup]:
     """
@@ -297,24 +305,20 @@ class Extractor:
         :type category: str, required
         """
         # Get the archive file
-        self.archive_file = get_category_value(config, category, "archive", str, None)
+        self.archive_file = get_category_value(config, category, "archive", [str], None)
         # Get whether to include metadata
-        self.write_metadata = get_category_value(config, category, "metadata", bool, False)
+        self.write_metadata = get_category_value(config, category, "metadata", [bool], False)
         # Get the galleries to include
-        self.include = get_category_value(config, category, "include", list, [])
+        self.include = get_category_value(config, category, "include", [list], [])
         # Get the site username and password
-        self.username = get_category_value(config, category, "username", str, None)
-        self.password = get_category_value(config, category, "password", str, None)
+        self.username = get_category_value(config, category, "username", [str], None)
+        self.password = get_category_value(config, category, "password", [str], None)
         # Get the filename format for the extractor
-        self.filename_format = get_category_value(config, category, "filename_format", str, "{title}")
+        self.filename_format = get_category_value(config, category, "filename_format", [str], "{title}")
         # Get the sleep wait times for the extractor
-        try:
-            self.webpage_sleep = float(config[category]["webpage_sleep"])
-        except (ValueError, KeyError): self.webpage_sleep = 1.5
-        try:
-            self.download_sleep = float(config[category]["download_sleep"])
-        except (ValueError, KeyError): self.download_sleep = 1.5
-            
+        self.download_sleep = get_category_value(config, category, "sleep", [int, float], 1.5)
+        self.webpage_sleep = get_category_value(config, category, "sleep-request", [int, float], 1.5)
+        
     
     def open_archive(self):
         """
@@ -408,23 +412,62 @@ class Extractor:
         """
         self.dict_to_header(self.requests_session.cookies.get_dict(), "Cookie")
         
+    def web_get_response(self, url:str) -> requests.Response:
+        """
+        Returns a Response object for the response of a GET request on a given URL.
+        Retries the request if the initial request fails.
+        
+        :param url: URL to get with a GET request
+        :type url: str, required
+        :return: Response object from the response
+        :rtype: requests.Response
+        """
+        self.initialize()
+        # Attempt loading the URL
+        for i in range(0, 3):
+            time.sleep(self.webpage_sleep)
+            try:
+                response = self.requests_session.get(url)
+                break
+            except:
+                response = None
+        return response
+        
     def web_get(self, url:str) -> bs4.BeautifulSoup:
         """
         Returns a BeautifulSoup object for the response of a GET request on a given URL.
+        Retries the request if the initial request fails.
         
         :param url: URL to get with a GET request
         :type url: str, required
         :return: BeautifulSoup object from the response
-        :rtype: BeautifulSoup
+        :rtype: bs4.BeautifulSoup
         """
-        # Get URL
-        self.initialize()
-        response = self.requests_session.get(url)
+        response = self.web_get_response(url)
         # Get BeautifulSoup object from the URL
-        time.sleep(self.webpage_sleep)
         response.encoding = "utf-8"
         self.beautifulsoup = bs4.BeautifulSoup(response.text, features="lxml")
         return self.beautifulsoup
+    
+    def web_post(self, url:str, data) -> dict:
+        """
+        Returns a dictionary for the response of a POST request on a given URL
+        
+        :param url: URL to get with a GET request
+        :type url: str, required
+        :param data: Data to use in the POST request
+        :type data: dict/string, required
+        :return: Dictionary from the response
+        :rtype: dict
+        """
+        self.initialize
+        # Attempt posting the url
+        for i in range(0, 2):
+            try:
+                response = self.requests_session.post(url, data=data).json
+                return response
+            except: pass
+        return {}
         
     def download(self, url:str=None, file_path:str=None, sleep:float=1.0) -> dict:
         """

@@ -74,9 +74,9 @@ class DocsLab(gallery_dvk.extractor.extractor.Extractor):
         """
         super().get_info_from_config(config, "docslab")
         # Get whether to download linked stories
-        self.download_stories = gallery_dvk.extractor.extractor.get_category_value(config, category, "download_stories", bool, False)
+        self.download_stories = gallery_dvk.extractor.extractor.get_category_value(config, category, "download_stories", [bool], False)
         # Get whether to download linked artwork
-        self.download_artwork = gallery_dvk.extractor.extractor.get_category_value(config, category, "download_artwork", bool, False)
+        self.download_artwork = gallery_dvk.extractor.extractor.get_category_value(config, category, "download_artwork", [bool], False)
 
     def get_id(self, url:str) -> str:
         """

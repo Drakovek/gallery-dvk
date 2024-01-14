@@ -7,24 +7,24 @@
         "download_artwork": false,
         "download_stories": false,
         "filename_format": "{id}_{title}",
-        "webpage_sleep": 1.5,
-        "download_sleep": 1.5
+        "sleep": 1.5,
+        "sleep-request": 1.5
     },
     "kemonocafe":
     {
         "metadata": false,
         "archive": null,
         "filename_format": "{id}",
-        "webpage_sleep": 1.5,
-        "download_sleep": 1.5
+        "sleep": 1.5,
+        "sleep-request": 1.5
     },
     "overflowingbra":
     {
         "metadata": false,
         "archive": null,
         "filename_format": "{title}",
-        "webpage_sleep": 3,
-        "download_sleep": 1.5
+        "sleep": 1.5,
+        "sleep-request": 3
     },
     "tgcomics":
     {
@@ -33,8 +33,8 @@
         "username": null,
         "password": null,
         "filename_format": "{title}",
-        "webpage_sleep": 1.5,
-        "download_sleep": 1.5
+        "sleep": 1.5,
+        "sleep-request": 1.5
     },
     "transfur":
     {
@@ -44,16 +44,16 @@
         "password": null,
         "include": ["gallery", "sketches"],
         "filename_format": "{id}_{title}",
-        "webpage_sleep": 1.5,
-        "download_sleep": 1.5
+        "sleep": 1.5,
+        "sleep-request": 1.5
     },
     "webtoon":
     {
         "metadata": false,
         "archive": null,
         "filename_format": "{id}_{title}",
-        "webpage_sleep": 1.5,
-        "download_sleep": 1.5,
+        "sleep": 1.5,
+        "sleep-request": 1.5,
         "stitch_images": true,
         "only_stitched": false
     }

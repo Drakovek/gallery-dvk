@@ -157,6 +157,30 @@ def test_get_elements_with_string():
     assert len(elements) == 1
     assert str(elements[0]) == "<p>Thing <b>Other</b></p>"
 
+def test_get_category_value():
+    """
+    Tests the get_category_value function.
+    """
+    # Test getting the value of a key for a given category
+    config = {"thing":{"key":"name", "other":2}, "next":{"B":"Another"}}
+    assert gd_extractor.get_category_value(config, "thing", "key", [str], "Nope") == "name"
+    assert gd_extractor.get_category_value(config, "thing", "other", [int], "Nope") == 2
+    assert gd_extractor.get_category_value(config, "next", "B", [str], "Nope") == "Another"
+    # Test getting value of a key in gallery-dl format
+    config["extractor"] = {"site":{"something":"else"}, "final":{"num":4.5}}
+    assert gd_extractor.get_category_value(config, "site", "something", [str], "Nope") == "else"
+    assert gd_extractor.get_category_value(config, "final", "num", [float], "Nope") == 4.5
+    # Test if the key doesn't exist
+    assert gd_extractor.get_category_value(config, "name", "key", [str], "Something") == "Something"
+    assert gd_extractor.get_category_value(config, "site", "key", [float], 1.0) == 1.0
+    # Test if the value of the value doesn't match the specified type
+    assert gd_extractor.get_category_value(config, "site", "something", [int], 3) == 3
+    assert gd_extractor.get_category_value(config, "thing", "other", [str, list], []) == []
+    # Test if the value can be of multiple types
+    assert gd_extractor.get_category_value(config, "thing", "other", [float, int], "Nope") == 2
+    assert gd_extractor.get_category_value(config, "final", "num", [float, int], "Nope") == 4.5
+    assert gd_extractor.get_category_value(config, "name", "key", [list, str], "Something") == "Something"
+
 def test_get_element_with_string():
     """
     Tests the get_element_with_string function.
@@ -278,11 +302,11 @@ def test_get_info_from_config():
     with Extractor("thing", [config_file]) as extractor:
         assert extractor.filename_format == "[{date}] {title}"
     # Test getting sleep values
-    config = {"thing":{"webpage_sleep":2.5, "download_sleep":3.0}}
+    config = {"thing":{"sleep-request":2.5, "sleep":3}}
     mm_file_tools.write_json_file(config_file, config)
     with Extractor("thing", [config_file]) as extractor:
         assert extractor.webpage_sleep == 2.5
-        assert extractor.download_sleep == 3.0
+        assert extractor.download_sleep == 3
     # Test if the category is invalid
     with Extractor("different", [config_file]) as extractor:
         assert extractor.archive_file is None
@@ -295,6 +319,12 @@ def test_get_info_from_config():
         assert extractor.filename_format == "{title}"
         assert extractor.webpage_sleep == 1.5
         assert extractor.download_sleep == 1.5
+    # Test getting extractor in gallery-dl format    
+    config = {"extractor":{"new":{"include":["different","things"], "sleep":2.3}}}
+    mm_file_tools.write_json_file(config_file, config)
+    with Extractor("new", [config_file]) as extractor:
+        assert extractor.include == ["different","things"]
+        assert extractor.download_sleep == 2.3
     # Test if the data types are invalid
     config = {"archive":1}
     config["metadata"] = "blah"

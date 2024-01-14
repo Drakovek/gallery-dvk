@@ -20,8 +20,8 @@
         "filename_format": "[{date}_{id}] {title}",
 
         "#": "Overrides the default amount of time to sleep when loading pages and downloading files",
-        "webpage_sleep": 2.0,
-        "download_sleep": 5.0
+        "sleep": 5.0,
+        "sleep-request": 2.0
     },
 
     "kemonocafe":
@@ -36,8 +36,8 @@
         "filename_format": "{id}",
 
         "#": "Overrides the default amount of time to sleep when loading pages and downloading files",
-        "webpage_sleep": 3.0,
-        "download_sleep": 3.0
+        "sleep": 3.0,
+        "sleep-request": 3.0
     },
 
     "overflowingbra":
@@ -52,8 +52,8 @@
         "filename_format": "[{date}] {title}",
 
         "#": "Overrides the default wait time for loading pages",
-        "webpage_sleep": 3,
-        "download_sleep": 1.5
+        "sleep": 1.5,
+        "sleep-request": 3
     },
     
     "tgcomics":
@@ -72,8 +72,8 @@
         "filename_format": "[{date}] {title}",
 
         "#": "Overrides the default amount of time to sleep when loading pages and downloading files",
-        "webpage_sleep": 1.0,
-        "download_sleep": 2.0
+        "sleep": 2.0,
+        "sleep-request": 1.0
     },
 
     "transfur":
@@ -95,8 +95,8 @@
         "filename_format": "[{date}_{id}] {title}",
 
         "#": "Overrides the default amount of time to sleep when loading pages and downloading files",
-        "webpage_sleep": 1.0,
-        "download_sleep": 2.0
+        "sleep": 2.0,
+        "sleep-request": 1.0
     },
     
     "webtoon":
@@ -111,8 +111,8 @@
         "filename_format": "[{date}_{id}] {title}",
 
         "#": "Overrides the default amount of time to sleep when loading pages and downloading files",
-        "webpage_sleep": 3.0,
-        "download_sleep": 1.0,
+        "sleep": 1.0,
+        "sleep-request": 3.0,
         
         "#": "Sets the Webtoon extractor to only include the stitched-together episode images, not the individual images",
         "stitch_images": true,
