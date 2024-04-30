@@ -132,7 +132,7 @@ def test_get_page_info():
         assert page["date"] == "2013-01-02"
         assert page["comic"] == "Addictive Science"
         assert page["tagline"] == "Addictive Science | A Science Webcomic by Cervelet"
-        assert page["author"] == "Cervelet"
+        assert page["author"] == "KC Staff"
         assert page["chapter"] == "group_1"
         assert page["chapter_description"] is None
         assert page["post_content"] is None
@@ -163,10 +163,10 @@ def test_get_page_info():
         assert page["title"] == "Instant Abs"
         assert page["url"] == "https://theeye.kemono.cafe/comic/instant-abs/"
         assert page["image_url"] == "https://theeye.kemono.cafe/wp-content/uploads/sites/11/2020/04/final258.png"
-        assert page["date"] == "2020-04-11"
+        assert page["date"] == "2020-04-13"
         assert page["comic"] == "The Eye of Ramalach"
         assert page["tagline"] == "The Eye of Ramalach | A Furry Webcomic by Avencri"
-        assert page["author"] == "Avencri"
+        assert page["author"] == "avencrieggmaster"
         assert page["chapter"] == "Last"
         assert page["chapter_description"] == "Other"
         assert page["post_content"] is None

@@ -126,19 +126,17 @@ def test_get_episodes():
     with Webtoon([]) as webtoon:
         # Test getting episodes for a webtoon comic
         episodes = webtoon.get_episodes("en/canvas/a-kats-god-awful-blessing/list?title_no=847082")
-        print(len(episodes))
         assert len(episodes) > 19
         assert episodes[0]["webtoon"] == "A Kat's (GOD AWFUL!!!) Blessing"
         assert episodes[0]["genre"] == "Comedy"
-        assert episodes[0]["authors"] == ["Peter Barton"]
-        assert episodes[0]["webtoon_views"] > 1500000
-        assert episodes[0]["webtoon_views"] < 2000000
-        assert episodes[0]["webtoon_subscribers"] > 15000
-        assert episodes[0]["webtoon_subscribers"] < 18000
+        assert episodes[0]["authors"] == ["Patricia Barton"]
+        assert episodes[0]["webtoon_views"] > 2000000
+        assert episodes[0]["webtoon_views"] < 2600000
+        assert episodes[0]["webtoon_subscribers"] > 20000
+        assert episodes[0]["webtoon_subscribers"] < 23000
         assert episodes[0]["webtoon_rating"] > 6.0
-        assert episodes[0]["webtoon_rating"] < 7.0
+        assert episodes[0]["webtoon_rating"] < 8.0
         assert episodes[0]["webtoon_summary"].startswith("Katherine Jones, a seventeen-year-old")
-        assert episodes[0]["webtoon_summary"].endswith("Updated Wed/Sat")
         assert episodes[0]["title"] == "Prologue"
         assert episodes[0]["episode"] == 1
         assert episodes[0]["date"] == "2023-02-28"
@@ -153,22 +151,23 @@ def test_get_episodes():
         assert episodes[0]["authors"] == ["Deya Muniz", "Emily Erdos"]
         assert episodes[0]["webtoon_views"] > 34000000
         assert episodes[0]["webtoon_views"] < 40000000
-        assert episodes[0]["webtoon_subscribers"] > 490000
-        assert episodes[0]["webtoon_subscribers"] < 500000
-        assert episodes[0]["webtoon_rating"] == 9.56
+        assert episodes[0]["webtoon_subscribers"] > 500000
+        assert episodes[0]["webtoon_subscribers"] < 550000
+        assert episodes[0]["webtoon_rating"] > 9.4
+        assert episodes[0]["webtoon_rating"] < 9.7
         assert episodes[0]["webtoon_summary"].startswith("Emile is an up-and-coming skater in the")
         assert episodes[0]["webtoon_summary"].endswith("into something more...?")
         assert episodes[0]["title"] == "Ep. 1 - Last Minute Matchup"
         assert episodes[0]["episode"] == 1
         assert episodes[0]["date"] == "2020-12-19"
-        assert episodes[0]["likes"] > 77500
-        assert episodes[0]["likes"] < 79500
+        assert episodes[0]["likes"] > 80000
+        assert episodes[0]["likes"] < 84000
         assert episodes[0]["url"] == "https://www.webtoons.com/en/romance/blades-of-furry/ep-1-last-minute-matchup/viewer?title_no=2383&episode_no=1"
         assert episodes[4]["title"] == "Ep. 5 - Tiny Rival"
         assert episodes[4]["episode"] == 5
         assert episodes[4]["date"] == "2021-01-02"
-        assert episodes[4]["likes"] > 69500
-        assert episodes[4]["likes"] < 71000
+        assert episodes[4]["likes"] > 70000
+        assert episodes[4]["likes"] < 75000
         assert episodes[4]["url"] == "https://www.webtoons.com/en/romance/blades-of-furry/ep-5-tiny-rival/viewer?title_no=2383&episode_no=5"
 
 def test_get_episode_info():

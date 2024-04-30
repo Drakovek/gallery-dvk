@@ -166,8 +166,8 @@ def test_get_links_from_user():
     with DocsLab([config_file]) as docslab:
         # Test getting submissions
         links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
-        assert len(links) > 67
-        assert len(links) < 75
+        assert len(links) > 75
+        assert len(links) < 85
         assert {"section":"3637/a-close-companion", "rating":"R"} in links
         assert {"section":"2917/comfort", "rating":"PG"} in links
         assert {"section":"2862/the-gift-ch-01", "rating":"X"} in links

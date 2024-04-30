@@ -222,7 +222,9 @@ class KemonoCafe(gallery_dvk.extractor.extractor.Extractor):
             author = re.sub(r"^\s+|\s+$", "", author)
             if not page["author"].lower() == author.lower():
                 page["author"] = author
-        except (AssertionError, AttributeError): pass
+        except (AssertionError, AttributeError): page["post_content"] = None
+        if page["post_content"] == "":
+            page["post_content"] = None
         # Return the page
         return page
 
