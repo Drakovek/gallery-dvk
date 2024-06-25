@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import tempfile
 import metadata_magic.file_tools as mm_file_tools
 from gallery_dvk.extractor.kemonocafe import KemonoCafe
 from os.path import abspath, basename, exists, join
@@ -50,33 +51,33 @@ def test_get_comic_pages():
     """
     Tests the get_comic_pages method.
     """
-    temp_dir = mm_file_tools.get_temp_dir()
-    config_file = abspath(join(temp_dir, "config.json"))
-    archive_file = abspath(join(temp_dir, "kemonocafe.db"))
-    config = {"kemonocafe":{"archive":archive_file, "metadata":True}}
-    mm_file_tools.write_json_file(config_file, config)
-    with KemonoCafe([config_file]) as kemonocafe:
-        # Test getting pages
-        pages = kemonocafe.get_comic_pages("paprika")
-        assert len(pages) > 128
-        assert "paprika.kemono.cafe/comic/page000" in pages
-        assert "paprika.kemono.cafe/comic/page001" in pages
-        assert "paprika.kemono.cafe/comic/page-128-shrodingers-pizza" in pages
-        assert "paprika.kemono.cafe/comic/page-127-the-perfect-lifeform" in pages
-        assert "paprika.kemono.cafe/comic/page128" not in pages
-        # Test getting pages that have already been downloaded
-        kemonocafe.initialize()
-        kemonocafe.add_to_archive("kemonocafe-paprika-page000")
-        kemonocafe.add_to_archive("kemonocafe-paprika-page-127-the-perfect-lifeform")
-        assert kemonocafe.archive_contains("kemonocafe-paprika-page000")
-        pages = kemonocafe.get_comic_pages("paprika")
-        assert len(pages) > 126
-        assert "paprika.kemono.cafe/comic/page001" in pages
-        assert "paprika.kemono.cafe/comic/page-128-shrodingers-pizza" in pages
-        assert "paprika.kemono.cafe/comic/page060" in pages
-        assert "paprika.kemono.cafe/comic/page000" not in pages
-        assert "paprika.kemono.cafe/comic/page-127-the-perfect-lifeform" not in pages
-        assert "paprika.kemono.cafe/comic/page128" not in pages
+    with tempfile.TemporaryDirectory() as temp_dir:
+        config_file = abspath(join(temp_dir, "config.json"))
+        archive_file = abspath(join(temp_dir, "kemonocafe.db"))
+        config = {"kemonocafe":{"archive":archive_file, "metadata":True}}
+        mm_file_tools.write_json_file(config_file, config)
+        with KemonoCafe([config_file]) as kemonocafe:
+            # Test getting pages
+            pages = kemonocafe.get_comic_pages("paprika")
+            assert len(pages) > 128
+            assert "paprika.kemono.cafe/comic/page000" in pages
+            assert "paprika.kemono.cafe/comic/page001" in pages
+            assert "paprika.kemono.cafe/comic/page-128-shrodingers-pizza" in pages
+            assert "paprika.kemono.cafe/comic/page-127-the-perfect-lifeform" in pages
+            assert "paprika.kemono.cafe/comic/page128" not in pages
+            # Test getting pages that have already been downloaded
+            kemonocafe.initialize()
+            kemonocafe.add_to_archive("kemonocafe-paprika-page000")
+            kemonocafe.add_to_archive("kemonocafe-paprika-page-127-the-perfect-lifeform")
+            assert kemonocafe.archive_contains("kemonocafe-paprika-page000")
+            pages = kemonocafe.get_comic_pages("paprika")
+            assert len(pages) > 126
+            assert "paprika.kemono.cafe/comic/page001" in pages
+            assert "paprika.kemono.cafe/comic/page-128-shrodingers-pizza" in pages
+            assert "paprika.kemono.cafe/comic/page060" in pages
+            assert "paprika.kemono.cafe/comic/page000" not in pages
+            assert "paprika.kemono.cafe/comic/page-127-the-perfect-lifeform" not in pages
+            assert "paprika.kemono.cafe/comic/page128" not in pages
         
 
 def test_get_chapter_info():
@@ -175,49 +176,49 @@ def test_download_page():
     """
     Tests the download_page method.
     """
-    # Test if ID is already in the database
-    temp_dir = mm_file_tools.get_temp_dir()
-    config_file = abspath(join(temp_dir, "config.json"))
-    archive_file = abspath(join(temp_dir, "kemonocafe.db"))
-    config = {"kemonocafe":{"archive":archive_file, "metadata":True}}
-    mm_file_tools.write_json_file(config_file, config)
-    with KemonoCafe([config_file]) as kemonocafe:
-        kemonocafe.initialize()
-        json = {"title":"Page0001"}
-        json["comic"] = "Addictive Science"
-        json["url"] = "https://addictivescience.kemono.cafe/comic/page0001/"
-        json["chapter"] = "Blah"
-        kemonocafe.add_to_archive("kemonocafe-addictivescience-page0001")
-        media_file = kemonocafe.download_page(json, temp_dir)
-        assert media_file is None
-    assert sorted(os.listdir(temp_dir)) == ["config.json", "kemonocafe.db"]
-    # Test if file has not been written
-    with KemonoCafe([config_file]) as kemonocafe:
-        json = {"title":"Page0002"}
-        json["id"] = "addictivescience-page0002"
-        json["comic"] = "Addictive Science"
-        json["chapter"] = "Ch1"
-        json["url"] = "https://addictivescience.kemono.cafe/comic/page0002/"
-        json["image_url"] = "https://addictivescience.kemono.cafe/wp-content/uploads/sites/12/2019/09/2013-01-02-page0002.jpg"
-        media_file = kemonocafe.download_page(json, temp_dir)
-        assert basename(media_file) == "addictivescience-page0002.jpg"
-        assert exists(media_file)
-    parent_folder = abspath(join(temp_dir, "KemonoCafe"))
-    comic_folder = abspath(join(parent_folder, "Addictive Science"))
-    chapter_folder = abspath(join(comic_folder, "Ch1"))
-    assert exists(chapter_folder)
-    json_file = abspath(join(chapter_folder, "addictivescience-page0002.json"))
-    assert exists(json_file)
-    meta = mm_file_tools.read_json_file(json_file)
-    assert meta["title"] == "Page0002"
-    assert meta["id"] == "addictivescience-page0002"
-    assert meta["comic"] == "Addictive Science"
-    assert meta["url"] == "https://addictivescience.kemono.cafe/comic/page0002/"
-    assert meta["image_url"] == "https://addictivescience.kemono.cafe/wp-content/uploads/sites/12/2019/09/2013-01-02-page0002.jpg"
-    assert os.stat(media_file).st_size == 452507
-    # Test that ID has been written to the database
-    with KemonoCafe([config_file]) as kemonocafe:
-        kemonocafe.initialize()
-        assert kemonocafe.archive_contains("kemonocafe-addictivescience-page0001")
-        assert kemonocafe.archive_contains("kemonocafe-addictivescience-page0002")
-        assert not kemonocafe.archive_contains("kemonocafe-addictivescience-page0003")
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Test if ID is already in the database
+        config_file = abspath(join(temp_dir, "config.json"))
+        archive_file = abspath(join(temp_dir, "kemonocafe.db"))
+        config = {"kemonocafe":{"archive":archive_file, "metadata":True}}
+        mm_file_tools.write_json_file(config_file, config)
+        with KemonoCafe([config_file]) as kemonocafe:
+            kemonocafe.initialize()
+            json = {"title":"Page0001"}
+            json["comic"] = "Addictive Science"
+            json["url"] = "https://addictivescience.kemono.cafe/comic/page0001/"
+            json["chapter"] = "Blah"
+            kemonocafe.add_to_archive("kemonocafe-addictivescience-page0001")
+            media_file = kemonocafe.download_page(json, temp_dir)
+            assert media_file is None
+        assert sorted(os.listdir(temp_dir)) == ["config.json", "kemonocafe.db"]
+        # Test if file has not been written
+        with KemonoCafe([config_file]) as kemonocafe:
+            json = {"title":"Page0002"}
+            json["id"] = "addictivescience-page0002"
+            json["comic"] = "Addictive Science"
+            json["chapter"] = "Ch1"
+            json["url"] = "https://addictivescience.kemono.cafe/comic/page0002/"
+            json["image_url"] = "https://addictivescience.kemono.cafe/wp-content/uploads/sites/12/2019/09/2013-01-02-page0002.jpg"
+            media_file = kemonocafe.download_page(json, temp_dir)
+            assert basename(media_file) == "addictivescience-page0002.jpg"
+            assert exists(media_file)
+        parent_folder = abspath(join(temp_dir, "KemonoCafe"))
+        comic_folder = abspath(join(parent_folder, "Addictive Science"))
+        chapter_folder = abspath(join(comic_folder, "Ch1"))
+        assert exists(chapter_folder)
+        json_file = abspath(join(chapter_folder, "addictivescience-page0002.json"))
+        assert exists(json_file)
+        meta = mm_file_tools.read_json_file(json_file)
+        assert meta["title"] == "Page0002"
+        assert meta["id"] == "addictivescience-page0002"
+        assert meta["comic"] == "Addictive Science"
+        assert meta["url"] == "https://addictivescience.kemono.cafe/comic/page0002/"
+        assert meta["image_url"] == "https://addictivescience.kemono.cafe/wp-content/uploads/sites/12/2019/09/2013-01-02-page0002.jpg"
+        assert os.stat(media_file).st_size == 452507
+        # Test that ID has been written to the database
+        with KemonoCafe([config_file]) as kemonocafe:
+            kemonocafe.initialize()
+            assert kemonocafe.archive_contains("kemonocafe-addictivescience-page0001")
+            assert kemonocafe.archive_contains("kemonocafe-addictivescience-page0002")
+            assert not kemonocafe.archive_contains("kemonocafe-addictivescience-page0003")

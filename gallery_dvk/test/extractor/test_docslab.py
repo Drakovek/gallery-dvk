@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import tempfile
 import metadata_magic.file_tools as mm_file_tools
 from gallery_dvk.extractor.docslab import DocsLab
 from os.path import abspath, basename, exists, join
@@ -59,25 +60,25 @@ def test_get_info_from_config():
         assert not docslab.download_stories
         assert not docslab.download_artwork
     # Test getting the archive_file from the config file
-    temp_dir = mm_file_tools.get_temp_dir()
-    config_file = abspath(join(temp_dir, "config.json"))
-    config = {"docslab":{"archive":"/file/path/"}, "other":{"archive":"thing"}}
-    mm_file_tools.write_json_file(config_file, config)
-    assert exists(config_file)
-    with DocsLab([config_file]) as docslab:
-        assert docslab.archive_file == "/file/path/"
-        assert docslab.archive_connection is None
-        assert not docslab.write_metadata
-    # Test getting the download_stories variable
-    config = {"docslab":{"download_stories":True}, "other":{"metadata":False}}
-    mm_file_tools.write_json_file(config_file, config)
-    with DocsLab([config_file]) as docslab:
-        assert docslab.download_stories
-    # Test getting the download_artwork variable
-    config = {"docslab":{"download_artwork":True}, "other":{"metadata":False}}
-    mm_file_tools.write_json_file(config_file, config)
-    with DocsLab([config_file]) as docslab:
-        assert docslab.download_artwork
+    with tempfile.TemporaryDirectory() as temp_dir:
+        config_file = abspath(join(temp_dir, "config.json"))
+        config = {"docslab":{"archive":"/file/path/"}, "other":{"archive":"thing"}}
+        mm_file_tools.write_json_file(config_file, config)
+        assert exists(config_file)
+        with DocsLab([config_file]) as docslab:
+            assert docslab.archive_file == "/file/path/"
+            assert docslab.archive_connection is None
+            assert not docslab.write_metadata
+        # Test getting the download_stories variable
+        config = {"docslab":{"download_stories":True}, "other":{"metadata":False}}
+        mm_file_tools.write_json_file(config_file, config)
+        with DocsLab([config_file]) as docslab:
+            assert docslab.download_stories
+        # Test getting the download_artwork variable
+        config = {"docslab":{"download_artwork":True}, "other":{"metadata":False}}
+        mm_file_tools.write_json_file(config_file, config)
+        with DocsLab([config_file]) as docslab:
+            assert docslab.download_artwork
 
 def test_get_submission_info():
     """
@@ -158,175 +159,178 @@ def test_get_links_from_user():
     """
     Tests the get_links_from_user method.
     """
-    temp_dir = mm_file_tools.get_temp_dir()
-    config_file = abspath(join(temp_dir, "config.json"))
-    archive_file = abspath(join(temp_dir, "docslab.db"))
-    config = {"docslab":{"archive":archive_file, "metadata":True}}
-    mm_file_tools.write_json_file(config_file, config)
-    with DocsLab([config_file]) as docslab:
-        # Test getting submissions
-        links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
-        assert len(links) > 75
-        assert len(links) < 85
-        assert {"section":"3637/a-close-companion", "rating":"R"} in links
-        assert {"section":"2917/comfort", "rating":"PG"} in links
-        assert {"section":"2862/the-gift-ch-01", "rating":"X"} in links
-        assert {"section":"3474/what-goes-around", "rating":"X"} in links
-        # Test getting favorites
-        links = docslab.get_links_from_user("gabrielmoon", get_submissions=False, get_favorites=True)
-        assert len(links) > 15
-        assert len(links) < 20
-        assert {"section":"2011/assembly-for-animals", "rating":None} in links
-        assert {"section":"2096/so-you-want-to-be-a-zebra", "rating":None} in links
-        assert {"section":"176/stud-mare", "rating":None} in links
-        assert {"section":"1649/you-and-your-beef", "rating":None} in links
-        # Test getting favorites
-        links = docslab.get_links_from_user("gabrielmoon", get_submissions=True, get_favorites=True)
-        assert len(links) > 240
-        assert len(links) < 300
-        assert {"section":"2011/assembly-for-animals", "rating":None} in links
-        assert {"section":"2096/so-you-want-to-be-a-zebra", "rating":None} in links
-        assert {"section":"176/stud-mare", "rating":None} in links
-        assert {"section":"1649/you-and-your-beef", "rating":None} in links
-        assert {"section":"3006/a-canadian-werewolf-in-philly", "rating":"X"} in links
-        assert {"section":"4103/wooing-wilderness-and-wolves", "rating":"X"} in links
-        # Test not including already downloaded files
-        docslab.add_to_archive("docslab-3637")
-        docslab.add_to_archive("docslab-2917")
-        docslab.add_to_archive("docslab-2862")
-        links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
-        assert len(links) > 65
-        assert len(links) < 90
-        assert {"section":"3637/a-close-companion", "rating":"R"} not in links
-        assert {"section":"2917/comfort", "rating":"PG"} not in links
-        assert {"section":"2862/the-gift-ch-01", "rating":"X"} not in links
-        assert {"section":"3430/esssssential-oilsssss", "rating":"X"} in links
-        assert {"section":"3474/what-goes-around", "rating":"X"} in links
+    with tempfile.TemporaryDirectory() as temp_dir:
+        config_file = abspath(join(temp_dir, "config.json"))
+        archive_file = abspath(join(temp_dir, "docslab.db"))
+        config = {"docslab":{"archive":archive_file, "metadata":True}}
+        mm_file_tools.write_json_file(config_file, config)
+        with DocsLab([config_file]) as docslab:
+            # Test getting submissions
+            links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
+            assert len(links) > 75
+            assert len(links) < 85
+            assert {"section":"3637/a-close-companion", "rating":"R"} in links
+            assert {"section":"2917/comfort", "rating":"PG"} in links
+            assert {"section":"2862/the-gift-ch-01", "rating":"X"} in links
+            assert {"section":"3474/what-goes-around", "rating":"X"} in links
+            # Test getting favorites
+            links = docslab.get_links_from_user("gabrielmoon", get_submissions=False, get_favorites=True)
+            assert len(links) > 15
+            assert len(links) < 20
+            assert {"section":"2011/assembly-for-animals", "rating":None} in links
+            assert {"section":"2096/so-you-want-to-be-a-zebra", "rating":None} in links
+            assert {"section":"176/stud-mare", "rating":None} in links
+            assert {"section":"1649/you-and-your-beef", "rating":None} in links
+            # Test getting favorites
+            links = docslab.get_links_from_user("gabrielmoon", get_submissions=True, get_favorites=True)
+            assert len(links) > 240
+            assert len(links) < 300
+            assert {"section":"2011/assembly-for-animals", "rating":None} in links
+            assert {"section":"2096/so-you-want-to-be-a-zebra", "rating":None} in links
+            assert {"section":"176/stud-mare", "rating":None} in links
+            assert {"section":"1649/you-and-your-beef", "rating":None} in links
+            assert {"section":"3006/a-canadian-werewolf-in-philly", "rating":"X"} in links
+            assert {"section":"4103/wooing-wilderness-and-wolves", "rating":"X"} in links
+            # Test not including already downloaded files
+            docslab.add_to_archive("docslab-3637")
+            docslab.add_to_archive("docslab-2917")
+            docslab.add_to_archive("docslab-2862")
+            links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
+            assert len(links) > 65
+            assert len(links) < 90
+            assert {"section":"3637/a-close-companion", "rating":"R"} not in links
+            assert {"section":"2917/comfort", "rating":"PG"} not in links
+            assert {"section":"2862/the-gift-ch-01", "rating":"X"} not in links
+            assert {"section":"3430/esssssential-oilsssss", "rating":"X"} in links
+            assert {"section":"3474/what-goes-around", "rating":"X"} in links
 
 def test_download_page():
-    # Test if the ID is already in the archive
-    temp_dir = mm_file_tools.get_temp_dir()
-    config_file = abspath(join(temp_dir, "config.json"))
-    archive_file = abspath(join(temp_dir, "docslab.db"))
-    config = {"docslab":{"archive":archive_file, "metadata":True}}
-    mm_file_tools.write_json_file(config_file, config)
-    with DocsLab([config_file]) as docslab:
-        docslab.initialize()
-        json = {"title":"A Party to Remember"}
-        json["url"] = "https://www.docs-lab.com/submissions/3600/a-party-to-remember"
-        json["artist"] = "gabrielmoon"
-        json["art_link"] = None
-        json["story_link"] = None
-        docslab.add_to_archive("docslab-3600")
-        media_file = docslab.download_page(json, temp_dir)
-        assert media_file is None
-    files = sorted(os.listdir(temp_dir)) == ["config.json", "docslab.db"]
-    # Test downloading a story submission
-    with DocsLab([config_file]) as docslab:
-        json = {"title":"Reflect On That, Chess"}
-        json["id"] = "2434"
-        json["artist"] = "kayemarquet"
-        json["url"] = "https://www.docs-lab.com/submissions/2434/reflect-on-that-chess"
-        json["text"] = "<!DOCTYPE html><html>Test!</html>"
-        json["art_link"] = None
-        json["story_link"] = None
-        media_file = docslab.download_page(json, temp_dir)
-        assert basename(media_file) == "2434_Reflect On That, Chess.html"
-        assert exists(media_file)
-    parent_folder = abspath(join(temp_dir, "DocsLab"))
-    artist_folder = abspath(join(parent_folder, "kayemarquet"))
-    assert exists(artist_folder)
-    json_file = abspath(join(artist_folder, "2434_Reflect On That, Chess.json"))
-    assert exists(json_file)
-    meta = mm_file_tools.read_json_file(json_file)
-    assert meta["id"] == "2434"
-    assert meta["title"] == "Reflect On That, Chess"
-    assert meta["artist"] == "kayemarquet"
-    assert meta["url"] == "https://www.docs-lab.com/submissions/2434/reflect-on-that-chess"
-    assert mm_file_tools.read_text_file(media_file) == "<!DOCTYPE html><html>Test!</html>"
-    # Test downloading a story submission with an image
-    config = {"docslab":{"archive":archive_file, "metadata":True, "download_artwork":True}}
-    mm_file_tools.write_json_file(config_file, config)
-    with DocsLab([config_file]) as docslab:
-        json = {"title":"New Zoo-Bears"}
-        json["id"] = "2585"
-        json["artist"] = "wallace111"
-        json["url"] = "https://www.docs-lab.com/submissions/2585/new-zoo-bears"
-        json["text"] = "<!DOCTYPE html><html>Other</html>"
-        json["art_link"] = "https://www.docs-lab.com/submissions/4701/new-zoo-bears"
-        json["story_link"] = None
-        media_file = docslab.download_page(json, temp_dir)
-        assert basename(media_file) == "2585_New Zoo-Bears.html"
-        assert exists(media_file)
-    parent_folder = abspath(join(temp_dir, "DocsLab"))
-    artist_folder = abspath(join(parent_folder, "wallace111"))
-    assert exists(artist_folder)
-    json_file = abspath(join(artist_folder, "2585_New Zoo-Bears.json"))
-    assert exists(json_file)
-    meta = mm_file_tools.read_json_file(json_file)
-    assert meta["id"] == "2585"
-    assert meta["title"] == "New Zoo-Bears"
-    assert meta["artist"] == "wallace111"
-    assert meta["url"] == "https://www.docs-lab.com/submissions/2585/new-zoo-bears"
-    assert meta["art_link"] == "https://www.docs-lab.com/submissions/4701/new-zoo-bears"
-    assert mm_file_tools.read_text_file(media_file) == "<!DOCTYPE html><html>Other</html>"
-    art_json = abspath(join(artist_folder, "4701_New Zoo-Bears.json"))
-    assert exists(art_json)
-    meta = mm_file_tools.read_json_file(art_json)
-    assert meta["id"] == "4701"
-    assert meta["title"] == "New Zoo-Bears"
-    assert meta["artist"] == "wallace111"
-    assert meta["url"] == "https://www.docs-lab.com/submissions/4701/new-zoo-bears"
-    assert meta["image_url"] == "https://www.docs-lab.com/img/art/3886_1693141935.png"
-    art_media = abspath(join(artist_folder, "4701_New Zoo-Bears.png"))
-    assert exists(art_media)
-    assert os.stat(art_media).st_size == 598728
-    # Test downloading an image submission with a story
-    config = {"docslab":{"archive":archive_file, "metadata":True, "download_stories":True}}
-    mm_file_tools.write_json_file(config_file, config)
-    with DocsLab([config_file]) as docslab:
-        json = {"title":"New Zoo-Geese"}
-        json["id"] = "4657"
-        json["artist"] = "wallace111"
-        json["url"] = "https://www.docs-lab.com/submissions/4657/new-zoo-geese"
-        json["image_url"] = "https://www.docs-lab.com/img/art/3886_1691011708.png"
-        json["story_link"] = "https://www.docs-lab.com/submissions/2574/new-zoo-geese"
-        json["art_link"] = None
-        media_file = docslab.download_page(json, temp_dir)
-        assert basename(media_file) == "4657_New Zoo-Geese.png"
-        assert exists(media_file)
-    parent_folder = abspath(join(temp_dir, "DocsLab"))
-    artist_folder = abspath(join(parent_folder, "wallace111"))
-    assert exists(artist_folder)
-    json_file = abspath(join(artist_folder, "4657_New Zoo-Geese.json"))
-    assert exists(json_file)
-    meta = mm_file_tools.read_json_file(json_file)
-    assert meta["id"] == "4657"
-    assert meta["title"] == "New Zoo-Geese"
-    assert meta["artist"] == "wallace111"
-    assert meta["url"] == "https://www.docs-lab.com/submissions/4657/new-zoo-geese"
-    assert meta["image_url"] == "https://www.docs-lab.com/img/art/3886_1691011708.png"
-    assert meta["story_link"] == "https://www.docs-lab.com/submissions/2574/new-zoo-geese"
-    assert os.stat(media_file).st_size == 736493
-    story_json = abspath(join(artist_folder, "2574_New Zoo-Geese.json"))
-    assert exists(story_json)
-    meta = mm_file_tools.read_json_file(story_json)
-    assert meta["id"] == "2574"
-    assert meta["title"] == "New Zoo-Geese"
-    assert meta["artist"] == "wallace111"
-    assert meta["url"] == "https://www.docs-lab.com/submissions/2574/new-zoo-geese"
-    story_file = abspath(join(artist_folder, "2574_New Zoo-Geese.html"))
-    assert exists(story_file)
-    text = mm_file_tools.read_text_file(story_file)
-    assert "A family walked under the stone" in text
-    # Test that submission IDs were added to the archive
-    with DocsLab([config_file]) as docslab:
-        docslab.initialize()
-        assert docslab.archive_contains("docslab-3600")
-        assert docslab.archive_contains("docslab-2434")
-        assert docslab.archive_contains("docslab-2585")
-        assert docslab.archive_contains("docslab-4701")
-        assert docslab.archive_contains("docslab-4657")
-        assert docslab.archive_contains("docslab-2574")
-        assert not docslab.archive_contains("docslab-12345")
-        assert not docslab.archive_contains("docslab-0245")
+    """
+    Tests the download_page method.
+    """
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Test if the ID is already in the archive
+        config_file = abspath(join(temp_dir, "config.json"))
+        archive_file = abspath(join(temp_dir, "docslab.db"))
+        config = {"docslab":{"archive":archive_file, "metadata":True}}
+        mm_file_tools.write_json_file(config_file, config)
+        with DocsLab([config_file]) as docslab:
+            docslab.initialize()
+            json = {"title":"A Party to Remember"}
+            json["url"] = "https://www.docs-lab.com/submissions/3600/a-party-to-remember"
+            json["artist"] = "gabrielmoon"
+            json["art_link"] = None
+            json["story_link"] = None
+            docslab.add_to_archive("docslab-3600")
+            media_file = docslab.download_page(json, temp_dir)
+            assert media_file is None
+        files = sorted(os.listdir(temp_dir)) == ["config.json", "docslab.db"]
+        # Test downloading a story submission
+        with DocsLab([config_file]) as docslab:
+            json = {"title":"Reflect On That, Chess"}
+            json["id"] = "2434"
+            json["artist"] = "kayemarquet"
+            json["url"] = "https://www.docs-lab.com/submissions/2434/reflect-on-that-chess"
+            json["text"] = "<!DOCTYPE html><html>Test!</html>"
+            json["art_link"] = None
+            json["story_link"] = None
+            media_file = docslab.download_page(json, temp_dir)
+            assert basename(media_file) == "2434_Reflect On That, Chess.html"
+            assert exists(media_file)
+        parent_folder = abspath(join(temp_dir, "DocsLab"))
+        artist_folder = abspath(join(parent_folder, "kayemarquet"))
+        assert exists(artist_folder)
+        json_file = abspath(join(artist_folder, "2434_Reflect On That, Chess.json"))
+        assert exists(json_file)
+        meta = mm_file_tools.read_json_file(json_file)
+        assert meta["id"] == "2434"
+        assert meta["title"] == "Reflect On That, Chess"
+        assert meta["artist"] == "kayemarquet"
+        assert meta["url"] == "https://www.docs-lab.com/submissions/2434/reflect-on-that-chess"
+        assert mm_file_tools.read_text_file(media_file) == "<!DOCTYPE html><html>Test!</html>"
+        # Test downloading a story submission with an image
+        config = {"docslab":{"archive":archive_file, "metadata":True, "download_artwork":True}}
+        mm_file_tools.write_json_file(config_file, config)
+        with DocsLab([config_file]) as docslab:
+            json = {"title":"New Zoo-Bears"}
+            json["id"] = "2585"
+            json["artist"] = "wallace111"
+            json["url"] = "https://www.docs-lab.com/submissions/2585/new-zoo-bears"
+            json["text"] = "<!DOCTYPE html><html>Other</html>"
+            json["art_link"] = "https://www.docs-lab.com/submissions/4701/new-zoo-bears"
+            json["story_link"] = None
+            media_file = docslab.download_page(json, temp_dir)
+            assert basename(media_file) == "2585_New Zoo-Bears.html"
+            assert exists(media_file)
+        parent_folder = abspath(join(temp_dir, "DocsLab"))
+        artist_folder = abspath(join(parent_folder, "wallace111"))
+        assert exists(artist_folder)
+        json_file = abspath(join(artist_folder, "2585_New Zoo-Bears.json"))
+        assert exists(json_file)
+        meta = mm_file_tools.read_json_file(json_file)
+        assert meta["id"] == "2585"
+        assert meta["title"] == "New Zoo-Bears"
+        assert meta["artist"] == "wallace111"
+        assert meta["url"] == "https://www.docs-lab.com/submissions/2585/new-zoo-bears"
+        assert meta["art_link"] == "https://www.docs-lab.com/submissions/4701/new-zoo-bears"
+        assert mm_file_tools.read_text_file(media_file) == "<!DOCTYPE html><html>Other</html>"
+        art_json = abspath(join(artist_folder, "4701_New Zoo-Bears.json"))
+        assert exists(art_json)
+        meta = mm_file_tools.read_json_file(art_json)
+        assert meta["id"] == "4701"
+        assert meta["title"] == "New Zoo-Bears"
+        assert meta["artist"] == "wallace111"
+        assert meta["url"] == "https://www.docs-lab.com/submissions/4701/new-zoo-bears"
+        assert meta["image_url"] == "https://www.docs-lab.com/img/art/3886_1693141935.png"
+        art_media = abspath(join(artist_folder, "4701_New Zoo-Bears.png"))
+        assert exists(art_media)
+        assert os.stat(art_media).st_size == 598728
+        # Test downloading an image submission with a story
+        config = {"docslab":{"archive":archive_file, "metadata":True, "download_stories":True}}
+        mm_file_tools.write_json_file(config_file, config)
+        with DocsLab([config_file]) as docslab:
+            json = {"title":"New Zoo-Geese"}
+            json["id"] = "4657"
+            json["artist"] = "wallace111"
+            json["url"] = "https://www.docs-lab.com/submissions/4657/new-zoo-geese"
+            json["image_url"] = "https://www.docs-lab.com/img/art/3886_1691011708.png"
+            json["story_link"] = "https://www.docs-lab.com/submissions/2574/new-zoo-geese"
+            json["art_link"] = None
+            media_file = docslab.download_page(json, temp_dir)
+            assert basename(media_file) == "4657_New Zoo-Geese.png"
+            assert exists(media_file)
+        parent_folder = abspath(join(temp_dir, "DocsLab"))
+        artist_folder = abspath(join(parent_folder, "wallace111"))
+        assert exists(artist_folder)
+        json_file = abspath(join(artist_folder, "4657_New Zoo-Geese.json"))
+        assert exists(json_file)
+        meta = mm_file_tools.read_json_file(json_file)
+        assert meta["id"] == "4657"
+        assert meta["title"] == "New Zoo-Geese"
+        assert meta["artist"] == "wallace111"
+        assert meta["url"] == "https://www.docs-lab.com/submissions/4657/new-zoo-geese"
+        assert meta["image_url"] == "https://www.docs-lab.com/img/art/3886_1691011708.png"
+        assert meta["story_link"] == "https://www.docs-lab.com/submissions/2574/new-zoo-geese"
+        assert os.stat(media_file).st_size == 736493
+        story_json = abspath(join(artist_folder, "2574_New Zoo-Geese.json"))
+        assert exists(story_json)
+        meta = mm_file_tools.read_json_file(story_json)
+        assert meta["id"] == "2574"
+        assert meta["title"] == "New Zoo-Geese"
+        assert meta["artist"] == "wallace111"
+        assert meta["url"] == "https://www.docs-lab.com/submissions/2574/new-zoo-geese"
+        story_file = abspath(join(artist_folder, "2574_New Zoo-Geese.html"))
+        assert exists(story_file)
+        text = mm_file_tools.read_text_file(story_file)
+        assert "A family walked under the stone" in text
+        # Test that submission IDs were added to the archive
+        with DocsLab([config_file]) as docslab:
+            docslab.initialize()
+            assert docslab.archive_contains("docslab-3600")
+            assert docslab.archive_contains("docslab-2434")
+            assert docslab.archive_contains("docslab-2585")
+            assert docslab.archive_contains("docslab-4701")
+            assert docslab.archive_contains("docslab-4657")
+            assert docslab.archive_contains("docslab-2574")
+            assert not docslab.archive_contains("docslab-12345")
+            assert not docslab.archive_contains("docslab-0245")

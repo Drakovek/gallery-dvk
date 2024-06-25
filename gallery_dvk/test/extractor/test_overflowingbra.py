@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import tempfile
 import metadata_magic.file_tools as mm_file_tools
 from gallery_dvk.extractor.overflowingbra import OverflowingBra
 from os.path import abspath, basename, exists, join
@@ -134,78 +135,78 @@ def test_download_page():
     """
     Tests the download_page method.
     """
-    # Test if ID is already in the database
-    temp_dir = mm_file_tools.get_temp_dir()
-    config_file = abspath(join(temp_dir, "config.json"))
-    archive_file = abspath(join(temp_dir, "archive.db"))
-    config = {"overflowingbra":{"archive":archive_file, "metadata":True}}
-    mm_file_tools.write_json_file(config_file, config)
-    with OverflowingBra([config_file]) as bra:
-        bra.initialize()
-        json = {"title":"Pillow Talk"}
-        json["author"] = "Plato Voltaire"
-        json["url"] = "https://overflowingbra.com/download.php?StoryID=412"
-        bra.add_to_archive("overflowingbra-412")
-        media_file = bra.download_page(json, temp_dir)
-        assert media_file is None
-    assert sorted(os.listdir(temp_dir)) == ["archive.db", "config.json"]
-    # Test ZIP containing a single file
-    with OverflowingBra([config_file]) as bra:
-        bra.initialize()
-        json = {"title":"Starfall"}
-        json["author"] = "Plato Voltaire"
-        json["url"] = "https://overflowingbra.com/download.php?StoryID=559"
-        json["date"] = "1998-02-18"
-        json["id"] = "559"
-        media_file = bra.download_page(json, temp_dir)
-        assert basename(media_file) == "Starfall.htm"
-        assert exists(media_file)
-    parent_folder = abspath(join(temp_dir, "OverflowingBra"))
-    author_folder = abspath(join(parent_folder, "Plato Voltaire"))
-    assert exists(author_folder)
-    json_file = abspath(join(author_folder, "Starfall.json"))
-    assert exists(json_file)
-    assert sorted(os.listdir(author_folder)) == ["Starfall.htm", "Starfall.json"]
-    meta = mm_file_tools.read_json_file(json_file)
-    assert meta["title"] == "Starfall"
-    assert meta["author"] == "Plato Voltaire"
-    assert meta["url"] == "https://overflowingbra.com/download.php?StoryID=559"
-    assert meta["date"] == "1998-02-18"
-    assert meta["id"] == "559"
-    contents = mm_file_tools.read_text_file(media_file)
-    assert contents.startswith("<!Starfall>")
-    assert "Quinn was drumming her fingers on the desk." in contents
-    assert "Derek was all too willing to find out." in contents
-    assert os.stat(media_file).st_size == 35574
-    # Test ZIP containing multiple files
-    with OverflowingBra([config_file]) as bra:
-        bra.initialize()
-        json = {"title":"Four of a Kind"}
-        json["author"] = "Oppailolicus"
-        json["url"] = "https://overflowingbra.com/download.php?StoryID=2877"
-        json["date"] = "2013-12-31"
-        json["id"] = "2877"
-        media_file = bra.download_page(json, temp_dir)
-        assert basename(media_file) == "Four of a Kind.zip"
-        assert exists(media_file)
-    parent_folder = abspath(join(temp_dir, "OverflowingBra"))
-    author_folder = abspath(join(parent_folder, "Oppailolicus"))
-    assert exists(author_folder)
-    json_file = abspath(join(author_folder, "Four of a Kind.json"))
-    assert exists(json_file)
-    assert sorted(os.listdir(author_folder)) == ["Four of a Kind.json", "Four of a Kind.zip"]
-    meta = mm_file_tools.read_json_file(json_file)
-    assert meta["title"] == "Four of a Kind"
-    assert meta["author"] == "Oppailolicus"
-    assert meta["url"] == "https://overflowingbra.com/download.php?StoryID=2877"
-    assert meta["date"] == "2013-12-31"
-    assert meta["id"] == "2877"
-    assert os.stat(media_file).st_size == 30914
-    # Test that IDs have been written to the database
-    with OverflowingBra([config_file]) as bra:
-        bra.initialize()
-        assert bra.archive_contains("overflowingbra-412")
-        assert bra.archive_contains("overflowingbra-559")
-        assert bra.archive_contains("overflowingbra-2877")
-        assert not bra.archive_contains("overflowingbra-1234")
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Test if ID is already in the database
+        config_file = abspath(join(temp_dir, "config.json"))
+        archive_file = abspath(join(temp_dir, "archive.db"))
+        config = {"overflowingbra":{"archive":archive_file, "metadata":True}}
+        mm_file_tools.write_json_file(config_file, config)
+        with OverflowingBra([config_file]) as bra:
+            bra.initialize()
+            json = {"title":"Pillow Talk"}
+            json["author"] = "Plato Voltaire"
+            json["url"] = "https://overflowingbra.com/download.php?StoryID=412"
+            bra.add_to_archive("overflowingbra-412")
+            media_file = bra.download_page(json, temp_dir)
+            assert media_file is None
+        assert sorted(os.listdir(temp_dir)) == ["archive.db", "config.json"]
+        # Test ZIP containing a single file
+        with OverflowingBra([config_file]) as bra:
+            bra.initialize()
+            json = {"title":"Starfall"}
+            json["author"] = "Plato Voltaire"
+            json["url"] = "https://overflowingbra.com/download.php?StoryID=559"
+            json["date"] = "1998-02-18"
+            json["id"] = "559"
+            media_file = bra.download_page(json, temp_dir)
+            assert basename(media_file) == "Starfall.htm"
+            assert exists(media_file)
+        parent_folder = abspath(join(temp_dir, "OverflowingBra"))
+        author_folder = abspath(join(parent_folder, "Plato Voltaire"))
+        assert exists(author_folder)
+        json_file = abspath(join(author_folder, "Starfall.json"))
+        assert exists(json_file)
+        assert sorted(os.listdir(author_folder)) == ["Starfall.htm", "Starfall.json"]
+        meta = mm_file_tools.read_json_file(json_file)
+        assert meta["title"] == "Starfall"
+        assert meta["author"] == "Plato Voltaire"
+        assert meta["url"] == "https://overflowingbra.com/download.php?StoryID=559"
+        assert meta["date"] == "1998-02-18"
+        assert meta["id"] == "559"
+        contents = mm_file_tools.read_text_file(media_file)
+        assert contents.startswith("<!Starfall>")
+        assert "Quinn was drumming her fingers on the desk." in contents
+        assert "Derek was all too willing to find out." in contents
+        assert os.stat(media_file).st_size == 35574
+        # Test ZIP containing multiple files
+        with OverflowingBra([config_file]) as bra:
+            bra.initialize()
+            json = {"title":"Four of a Kind"}
+            json["author"] = "Oppailolicus"
+            json["url"] = "https://overflowingbra.com/download.php?StoryID=2877"
+            json["date"] = "2013-12-31"
+            json["id"] = "2877"
+            media_file = bra.download_page(json, temp_dir)
+            assert basename(media_file) == "Four of a Kind.zip"
+            assert exists(media_file)
+        parent_folder = abspath(join(temp_dir, "OverflowingBra"))
+        author_folder = abspath(join(parent_folder, "Oppailolicus"))
+        assert exists(author_folder)
+        json_file = abspath(join(author_folder, "Four of a Kind.json"))
+        assert exists(json_file)
+        assert sorted(os.listdir(author_folder)) == ["Four of a Kind.json", "Four of a Kind.zip"]
+        meta = mm_file_tools.read_json_file(json_file)
+        assert meta["title"] == "Four of a Kind"
+        assert meta["author"] == "Oppailolicus"
+        assert meta["url"] == "https://overflowingbra.com/download.php?StoryID=2877"
+        assert meta["date"] == "2013-12-31"
+        assert meta["id"] == "2877"
+        assert os.stat(media_file).st_size == 30914
+        # Test that IDs have been written to the database
+        with OverflowingBra([config_file]) as bra:
+            bra.initialize()
+            assert bra.archive_contains("overflowingbra-412")
+            assert bra.archive_contains("overflowingbra-559")
+            assert bra.archive_contains("overflowingbra-2877")
+            assert not bra.archive_contains("overflowingbra-1234")
 

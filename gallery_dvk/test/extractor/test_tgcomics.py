@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import tempfile
 import gallery_dvk.extractor.tgcomics
 import metadata_magic.file_tools as mm_file_tools
 from gallery_dvk.extractor.tgcomics import TGComics
@@ -646,31 +647,31 @@ def test_with_login():
     Tests getting info from TGComics pages that are unavailable when not logged in.
     Requires a user config file with TGComics username and password to pass.
     """
-    temp_dir = mm_file_tools.get_temp_dir()
-    archive_file = abspath(join(temp_dir, "tgcomics.db"))
-    with TGComics() as tgcomics:
-        # Nullify archive_file so user archive isn't overwritten
-        try:
-            tgcomics.archive_connection.close()
-        except AttributeError: pass
-        tgcomics.filename_format = "{title}"
-        tgcomics.archive_file = archive_file
-        tgcomics.open_archive()
-        tgcomics.write_metadata = True
-        # Test logging in
-        if tgcomics.username is None or tgcomics.password is None:
-            raise Exception("TGComics Username and Password must be provided in a user config file to perform this test.")
-        assert tgcomics.login(tgcomics.username, tgcomics.password)
-        assert tgcomics.attempted_login
-        # Test getting categories from a page
-        get_categories_test(tgcomics)
-        # Test getting the image pages
-        get_image_pages_test(tgcomics)
-        # Test getting the video page
-        get_video_page_test(tgcomics)
-        # Test getting the archive pages
-        get_archive_pages_test(tgcomics)
-        # Test pages from collection
-        get_pages_from_collection_test(tgcomics)
-        # Test downloading pages
-        download_page_test(tgcomics, temp_dir)
+    with tempfile.TemporaryDirectory() as temp_dir:
+        archive_file = abspath(join(temp_dir, "tgcomics.db"))
+        with TGComics() as tgcomics:
+            # Nullify archive_file so user archive isn't overwritten
+            try:
+                tgcomics.archive_connection.close()
+            except AttributeError: pass
+            tgcomics.filename_format = "{title}"
+            tgcomics.archive_file = archive_file
+            tgcomics.open_archive()
+            tgcomics.write_metadata = True
+            # Test logging in
+            if tgcomics.username is None or tgcomics.password is None:
+                raise Exception("TGComics Username and Password must be provided in a user config file to perform this test.")
+            assert tgcomics.login(tgcomics.username, tgcomics.password)
+            assert tgcomics.attempted_login
+            # Test getting categories from a page
+            get_categories_test(tgcomics)
+            # Test getting the image pages
+            get_image_pages_test(tgcomics)
+            # Test getting the video page
+            get_video_page_test(tgcomics)
+            # Test getting the archive pages
+            get_archive_pages_test(tgcomics)
+            # Test pages from collection
+            get_pages_from_collection_test(tgcomics)
+            # Test downloading pages
+            download_page_test(tgcomics, temp_dir)

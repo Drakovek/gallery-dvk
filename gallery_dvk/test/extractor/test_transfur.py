@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import tempfile
 import metadata_magic.file_tools as mm_file_tools
 from gallery_dvk.extractor.transfur import Transfur
 from os.path import abspath, basename, exists, join
@@ -105,31 +106,31 @@ def test_archive_contains_all():
     """
     Tests the archive_contains_all method.
     """
-    temp_dir = mm_file_tools.get_temp_dir()
-    config_file = abspath(join(temp_dir, "config.json"))
-    archive_file = abspath(join(temp_dir, "tf.sqlite3"))
-    config = {"transfur":{"archive":archive_file}}
-    mm_file_tools.write_json_file(config_file, config)
-    assert exists(config_file)
-    base = "https://www.transfur.com/Users/"
-    with Transfur([config_file]) as transfur:
-        # Test if the database contains the main page
-        transfur.initialize()
-        transfur.add_to_archive("transfur-nonexist-8080-1")
-        assert transfur.archive_contains("transfur-nonexist-8080-1")
-        assert transfur.archive_contains_all(f"{base}nonexist/Submissions/8080", 1)
-        assert not transfur.archive_contains_all(f"{base}nonexist/Submissions/1234", 1)
-        # Test if database only contains some of the images in a sequence
-        transfur.add_to_archive("transfur-nonexist-5000-1")
-        transfur.add_to_archive("transfur-nonexist-5000-2")
-        transfur.add_to_archive("transfur-nonexist-5000-3")
-        transfur.add_to_archive("transfur-nonexist-40-2")
-        transfur.add_to_archive("transfur-nonexist-24-1")
-        transfur.add_to_archive("transfur-nonexist-24-2")
-        assert transfur.archive_contains_all(f"{base}nonexist/Submissions/5000/2", 3)
-        assert not transfur.archive_contains_all(f"{base}nonexist/Submissions/8080", 2)
-        assert not transfur.archive_contains_all(f"{base}nonexist/Submissions/40/2", 3)
-        assert not transfur.archive_contains_all(f"{base}nonexist/Submissions/24", 3)
+    with tempfile.TemporaryDirectory() as temp_dir:
+        config_file = abspath(join(temp_dir, "config.json"))
+        archive_file = abspath(join(temp_dir, "tf.sqlite3"))
+        config = {"transfur":{"archive":archive_file}}
+        mm_file_tools.write_json_file(config_file, config)
+        assert exists(config_file)
+        base = "https://www.transfur.com/Users/"
+        with Transfur([config_file]) as transfur:
+            # Test if the database contains the main page
+            transfur.initialize()
+            transfur.add_to_archive("transfur-nonexist-8080-1")
+            assert transfur.archive_contains("transfur-nonexist-8080-1")
+            assert transfur.archive_contains_all(f"{base}nonexist/Submissions/8080", 1)
+            assert not transfur.archive_contains_all(f"{base}nonexist/Submissions/1234", 1)
+            # Test if database only contains some of the images in a sequence
+            transfur.add_to_archive("transfur-nonexist-5000-1")
+            transfur.add_to_archive("transfur-nonexist-5000-2")
+            transfur.add_to_archive("transfur-nonexist-5000-3")
+            transfur.add_to_archive("transfur-nonexist-40-2")
+            transfur.add_to_archive("transfur-nonexist-24-1")
+            transfur.add_to_archive("transfur-nonexist-24-2")
+            assert transfur.archive_contains_all(f"{base}nonexist/Submissions/5000/2", 3)
+            assert not transfur.archive_contains_all(f"{base}nonexist/Submissions/8080", 2)
+            assert not transfur.archive_contains_all(f"{base}nonexist/Submissions/40/2", 3)
+            assert not transfur.archive_contains_all(f"{base}nonexist/Submissions/24", 3)
 
 def test_get_info_from_page():
     """
@@ -211,144 +212,144 @@ def test_get_links_from_gallery():
         assert {"section":"picklejuice/submissions/21302", "num_images":22} in links
         assert {"section":"picklejuice/submissions/17398", "num_images":1} in links
         assert {"section":"picklejuice/submissions/9104", "num_images":3} in links
-        assert {"section":"picklejuice/submissions/426", "num_images":10} in links        
-    # Test not getting already downloaded links
-    temp_dir = mm_file_tools.get_temp_dir()
-    config_file = abspath(join(temp_dir, "config.json"))
-    archive_file = abspath(join(temp_dir, "transfur.db"))
-    config = {"transfur":{"archive":archive_file, "metadata":True}}
-    mm_file_tools.write_json_file(config_file, config)
-    with Transfur([config_file]) as transfur:
-        transfur.initialize()
-        transfur.add_to_archive("transfur-angrboda-11122-1")
-        transfur.add_to_archive("transfur-angrboda-11122-2")
-        transfur.add_to_archive("transfur-angrboda-11122-3")
-        transfur.add_to_archive("transfur-angrboda-11122-4")
-        transfur.add_to_archive("transfur-angrboda-7491-1")
-        transfur.add_to_archive("transfur-angrboda-8985-1")
-        transfur.add_to_archive("transfur-angrboda-10765-2")
-        transfur.add_to_archive("transfur-angrboda-10765-3")
-        links = transfur.get_links_from_gallery(f"{base}angrboda/Gallery")
-        assert not {"section":"angrboda/submissions/7491", "num_images":1} in links
-        assert not {"section":"angrboda/submissions/11122", "num_images":4} in links
-        assert {"section":f"angrboda/submissions/8985", "num_images":3} in links
-        assert {"section":f"angrboda/submissions/10765", "num_images":4} in links
-        assert {"section":f"angrboda/submissions/8744", "num_images":1} in links
-        assert {"section":f"angrboda/submissions/7003", "num_images":8} in links
-        assert {"section":f"angrboda/submissions/3030", "num_images":1} in links
-        assert {"section":f"angrboda/submissions/3018", "num_images":1} in links
+        assert {"section":"picklejuice/submissions/426", "num_images":10} in links
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Test not getting already downloaded links
+        config_file = abspath(join(temp_dir, "config.json"))
+        archive_file = abspath(join(temp_dir, "transfur.db"))
+        config = {"transfur":{"archive":archive_file, "metadata":True}}
+        mm_file_tools.write_json_file(config_file, config)
+        with Transfur([config_file]) as transfur:
+            transfur.initialize()
+            transfur.add_to_archive("transfur-angrboda-11122-1")
+            transfur.add_to_archive("transfur-angrboda-11122-2")
+            transfur.add_to_archive("transfur-angrboda-11122-3")
+            transfur.add_to_archive("transfur-angrboda-11122-4")
+            transfur.add_to_archive("transfur-angrboda-7491-1")
+            transfur.add_to_archive("transfur-angrboda-8985-1")
+            transfur.add_to_archive("transfur-angrboda-10765-2")
+            transfur.add_to_archive("transfur-angrboda-10765-3")
+            links = transfur.get_links_from_gallery(f"{base}angrboda/Gallery")
+            assert not {"section":"angrboda/submissions/7491", "num_images":1} in links
+            assert not {"section":"angrboda/submissions/11122", "num_images":4} in links
+            assert {"section":f"angrboda/submissions/8985", "num_images":3} in links
+            assert {"section":f"angrboda/submissions/10765", "num_images":4} in links
+            assert {"section":f"angrboda/submissions/8744", "num_images":1} in links
+            assert {"section":f"angrboda/submissions/7003", "num_images":8} in links
+            assert {"section":f"angrboda/submissions/3030", "num_images":1} in links
+            assert {"section":f"angrboda/submissions/3018", "num_images":1} in links
 
 def test_download_page():
     """
     Tests the download_page method.
     """
-    # Test if ID is already in the database
-    temp_dir = mm_file_tools.get_temp_dir()
-    base = "https://www.transfur.com/Users/"
-    config_file = abspath(join(temp_dir, "config.json"))
-    archive_file = abspath(join(temp_dir, "transfur.db"))
-    config = {"transfur":{"archive":archive_file, "metadata":True}}
-    mm_file_tools.write_json_file(config_file, config)
-    with Transfur([config_file]) as transfur:
-        transfur.initialize()
-        json = {"title":"Unexpected Happiness"}
-        json["url"] = f"{base}mxmaramoose/Submissions/27317/2"
-        json["artist"] = "Mxmaramoose"
-        transfur.add_to_archive("transfur-mxmaramoose-27317-2")
-        media_file = transfur.download_page(json, temp_dir)
-        assert media_file is None
-    files = sorted(os.listdir(temp_dir)) == ["config.json", "transfur.db"]
-    # Test if file has not been written
-    with Transfur([config_file]) as transfur:
-        json = {"title":"Bear TF TG"}
-        json["id"] = "17614-1"
-        json["artist"] = "Oter"
-        json["url"] = f"{base}Oter/Submissions/17614"
-        json["image_url"] = f"{base}oter/Images/bear%20tf%20tg%20final.jpg"
-        media_file = transfur.download_page(json, temp_dir)
-        assert basename(media_file) == "17614-1_Bear TF TG.jpg"
-        assert exists(media_file)
-    parent_folder = abspath(join(temp_dir, "Transfur"))
-    artist_folder = abspath(join(parent_folder, "Oter"))
-    assert exists(artist_folder)
-    json_file = abspath(join(artist_folder, "17614-1_Bear TF TG.json"))
-    assert exists(json_file)
-    meta = mm_file_tools.read_json_file(json_file)
-    assert meta["title"] == "Bear TF TG"
-    assert meta["artist"] == "Oter"
-    assert meta["url"] == f"{base}Oter/Submissions/17614"
-    assert meta["image_url"] == f"{base}oter/Images/bear%20tf%20tg%20final.jpg"
-    assert os.stat(media_file).st_size == 261987
-    # Test that ID has been written to the database
-    with Transfur([config_file]) as transfur:
-        transfur.initialize()
-        assert transfur.archive_contains("transfur-mxmaramoose-27317-2")
-        assert transfur.archive_contains("transfur-oter-17614-1")
-        assert not transfur.archive_contains("transfur-nonexist-12345")
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Test if ID is already in the database
+        base = "https://www.transfur.com/Users/"
+        config_file = abspath(join(temp_dir, "config.json"))
+        archive_file = abspath(join(temp_dir, "transfur.db"))
+        config = {"transfur":{"archive":archive_file, "metadata":True}}
+        mm_file_tools.write_json_file(config_file, config)
+        with Transfur([config_file]) as transfur:
+            transfur.initialize()
+            json = {"title":"Unexpected Happiness"}
+            json["url"] = f"{base}mxmaramoose/Submissions/27317/2"
+            json["artist"] = "Mxmaramoose"
+            transfur.add_to_archive("transfur-mxmaramoose-27317-2")
+            media_file = transfur.download_page(json, temp_dir)
+            assert media_file is None
+        files = sorted(os.listdir(temp_dir)) == ["config.json", "transfur.db"]
+        # Test if file has not been written
+        with Transfur([config_file]) as transfur:
+            json = {"title":"Bear TF TG"}
+            json["id"] = "17614-1"
+            json["artist"] = "Oter"
+            json["url"] = f"{base}Oter/Submissions/17614"
+            json["image_url"] = f"{base}oter/Images/bear%20tf%20tg%20final.jpg"
+            media_file = transfur.download_page(json, temp_dir)
+            assert basename(media_file) == "17614-1_Bear TF TG.jpg"
+            assert exists(media_file)
+        parent_folder = abspath(join(temp_dir, "Transfur"))
+        artist_folder = abspath(join(parent_folder, "Oter"))
+        assert exists(artist_folder)
+        json_file = abspath(join(artist_folder, "17614-1_Bear TF TG.json"))
+        assert exists(json_file)
+        meta = mm_file_tools.read_json_file(json_file)
+        assert meta["title"] == "Bear TF TG"
+        assert meta["artist"] == "Oter"
+        assert meta["url"] == f"{base}Oter/Submissions/17614"
+        assert meta["image_url"] == f"{base}oter/Images/bear%20tf%20tg%20final.jpg"
+        assert os.stat(media_file).st_size == 261987
+        # Test that ID has been written to the database
+        with Transfur([config_file]) as transfur:
+            transfur.initialize()
+            assert transfur.archive_contains("transfur-mxmaramoose-27317-2")
+            assert transfur.archive_contains("transfur-oter-17614-1")
+            assert not transfur.archive_contains("transfur-nonexist-12345")
 
 def test_with_login():
     """
     Tests getting info from Transfur pages that are unavailable when not logged in.
     Requires a user config file with Transfur username and password to pass.
     """
-    temp_dir = mm_file_tools.get_temp_dir()
-    archive_file = abspath(join(temp_dir, "transfur.db"))
-    with Transfur() as transfur:
-        # Nullify archive_file so user archive isn't overwritten
-        try:
-            transfur.archive_connection.close()
-        except AttributeError: pass
-        transfur.filename_format = "{id}_{title}"
-        transfur.archive_file = archive_file
-        transfur.open_archive()
-        transfur.write_metadata = True
-        # Test logging in
-        if transfur.username is None or transfur.password is None:
-            raise Exception("Transfur Username and Password must be provided in a user config file to perform this test.")
-        assert transfur.login(transfur.username, transfur.password)
-        assert transfur.attempted_login
-        # Test getting links from gallery that are not shown unless logged in
-        base = "https://www.transfur.com/users/"
-        links = transfur.get_links_from_gallery(f"{base}danwolf/Gallery")
-        assert {"section":"danwolf/submissions/27823", "num_images":1} in links
-        assert {"section":"danwolf/submissions/26904", "num_images":1} in links
-        assert {"section":"danwolf/submissions/25295", "num_images":1} in links
-        # Test getting info from page that is locked when not logged in
-        pages = transfur.get_info_from_page("Danwolf/Submissions/26719")
-        assert len(pages) == 1
-        assert pages[0]["title"] == "Digimon beast"
-        assert pages[0]["artist"] == "Danwolf"
-        assert pages[0]["date"] == "2021-05-01"
-        assert pages[0]["url"] == f"{base}danwolf/submissions/26719"
-        assert pages[0]["image_url"] == f"{base}danwolf/images/resizerimage1280x1810.jpg"
-        assert pages[0]["tags"] == ["Big", "Digimon", "Muscular", "Shapeshifter",
-                "Traditional", "Werecreature", "Weregarurumon", "Wolf"]
-        assert pages[0]["views"] is None
-        assert pages[0]["favorites"] > 25
-        assert pages[0]["favorites"] < 35
-        description = "<p>Foxlightning wanted his a beefy version of his favorite boi ! "\
-                +"Wish granted &gt;:3</p>"
-        assert pages[0]["description"] == description
-        assert pages[0]["image_number"] == 1
-        assert pages[0]["total_images"] == 1
-        assert pages[0]["id"] == "26719-1"
-        # Test downloading page that is locked when not logged in
-        json = {"title":"Digimon beast"}
-        json["id"] = "26719-1"
-        json["artist"] = "Danwolf"
-        json["url"] = f"{base}danwolf/submissions/26719"
-        json["image_url"] = f"{base}danwolf/images/resizerimage1280x1810.jpg"
-        media_file = transfur.download_page(json, temp_dir)
-        assert basename(media_file) == "26719-1_Digimon beast.jpg"
-        assert exists(media_file)
-        parent_folder = abspath(join(temp_dir, "Transfur"))
-        artist_folder = abspath(join(parent_folder, "Danwolf"))
-        assert exists(artist_folder)
-        json_file = abspath(join(artist_folder, "26719-1_Digimon beast.json"))
-        assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
-        assert meta["title"] == "Digimon beast"
-        assert meta["artist"] == "Danwolf"
-        assert meta["url"] == f"{base}danwolf/submissions/26719"
-        assert meta["image_url"] == f"{base}danwolf/images/resizerimage1280x1810.jpg"
-        assert os.stat(media_file).st_size == 249183
+    with tempfile.TemporaryDirectory() as temp_dir:
+        archive_file = abspath(join(temp_dir, "transfur.db"))
+        with Transfur() as transfur:
+            # Nullify archive_file so user archive isn't overwritten
+            try:
+                transfur.archive_connection.close()
+            except AttributeError: pass
+            transfur.filename_format = "{id}_{title}"
+            transfur.archive_file = archive_file
+            transfur.open_archive()
+            transfur.write_metadata = True
+            # Test logging in
+            if transfur.username is None or transfur.password is None:
+                raise Exception("Transfur Username and Password must be provided in a user config file to perform this test.")
+            assert transfur.login(transfur.username, transfur.password)
+            assert transfur.attempted_login
+            # Test getting links from gallery that are not shown unless logged in
+            base = "https://www.transfur.com/users/"
+            links = transfur.get_links_from_gallery(f"{base}danwolf/Gallery")
+            assert {"section":"danwolf/submissions/27823", "num_images":1} in links
+            assert {"section":"danwolf/submissions/26904", "num_images":1} in links
+            assert {"section":"danwolf/submissions/25295", "num_images":1} in links
+            # Test getting info from page that is locked when not logged in
+            pages = transfur.get_info_from_page("Danwolf/Submissions/26719")
+            assert len(pages) == 1
+            assert pages[0]["title"] == "Digimon beast"
+            assert pages[0]["artist"] == "Danwolf"
+            assert pages[0]["date"] == "2021-05-01"
+            assert pages[0]["url"] == f"{base}danwolf/submissions/26719"
+            assert pages[0]["image_url"] == f"{base}danwolf/images/resizerimage1280x1810.jpg"
+            assert pages[0]["tags"] == ["Big", "Digimon", "Muscular", "Shapeshifter",
+                    "Traditional", "Werecreature", "Weregarurumon", "Wolf"]
+            assert pages[0]["views"] is None
+            assert pages[0]["favorites"] > 25
+            assert pages[0]["favorites"] < 35
+            description = "<p>Foxlightning wanted his a beefy version of his favorite boi ! "\
+                    +"Wish granted &gt;:3</p>"
+            assert pages[0]["description"] == description
+            assert pages[0]["image_number"] == 1
+            assert pages[0]["total_images"] == 1
+            assert pages[0]["id"] == "26719-1"
+            # Test downloading page that is locked when not logged in
+            json = {"title":"Digimon beast"}
+            json["id"] = "26719-1"
+            json["artist"] = "Danwolf"
+            json["url"] = f"{base}danwolf/submissions/26719"
+            json["image_url"] = f"{base}danwolf/images/resizerimage1280x1810.jpg"
+            media_file = transfur.download_page(json, temp_dir)
+            assert basename(media_file) == "26719-1_Digimon beast.jpg"
+            assert exists(media_file)
+            parent_folder = abspath(join(temp_dir, "Transfur"))
+            artist_folder = abspath(join(parent_folder, "Danwolf"))
+            assert exists(artist_folder)
+            json_file = abspath(join(artist_folder, "26719-1_Digimon beast.json"))
+            assert exists(json_file)
+            meta = mm_file_tools.read_json_file(json_file)
+            assert meta["title"] == "Digimon beast"
+            assert meta["artist"] == "Danwolf"
+            assert meta["url"] == f"{base}danwolf/submissions/26719"
+            assert meta["image_url"] == f"{base}danwolf/images/resizerimage1280x1810.jpg"
+            assert os.stat(media_file).st_size == 249183
