@@ -446,7 +446,7 @@ class Extractor:
         response = self.web_get_response(url)
         # Get BeautifulSoup object from the URL
         response.encoding = "utf-8"
-        self.beautifulsoup = bs4.BeautifulSoup(response.text, features="lxml")
+        self.beautifulsoup = bs4.BeautifulSoup(response.text, features="html5lib")
         return self.beautifulsoup
     
     def web_post(self, url:str, data) -> dict:

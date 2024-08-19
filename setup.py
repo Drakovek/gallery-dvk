@@ -11,7 +11,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gallery-dvk",
-    version="0.4.0",
+    version="0.4.1",
     author="Drakovek",
     author_email="DrakovekMail@gmail.com",
     description="Utility for downloading media from various image hosting websites.",
@@ -21,6 +21,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=["beautifulsoup4",
                 "HTML-String-Tools",
+                "html5lib",
                 "Metadata-Magic",
                 "Pillow",
                 "Python-Print-Tools",

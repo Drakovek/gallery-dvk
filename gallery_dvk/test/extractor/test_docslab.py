@@ -183,8 +183,8 @@ def test_get_links_from_user():
             assert {"section":"1649/you-and-your-beef", "rating":None} in links
             # Test getting favorites
             links = docslab.get_links_from_user("gabrielmoon", get_submissions=True, get_favorites=True)
-            assert len(links) > 240
-            assert len(links) < 300
+            assert len(links) > 300
+            assert len(links) < 340
             assert {"section":"2011/assembly-for-animals", "rating":None} in links
             assert {"section":"2096/so-you-want-to-be-a-zebra", "rating":None} in links
             assert {"section":"176/stud-mare", "rating":None} in links

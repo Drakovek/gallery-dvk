@@ -131,8 +131,8 @@ def test_get_episodes():
         assert episodes[0]["webtoon"] == "A Kat's (GOD AWFUL!!!) Blessing"
         assert episodes[0]["genre"] == "Comedy"
         assert episodes[0]["authors"] == ["Patricia Barton"]
-        assert episodes[0]["webtoon_views"] > 2000000
-        assert episodes[0]["webtoon_views"] < 2600000
+        assert episodes[0]["webtoon_views"] > 2500000
+        assert episodes[0]["webtoon_views"] < 3100000
         assert episodes[0]["webtoon_subscribers"] > 20000
         assert episodes[0]["webtoon_subscribers"] < 23000
         assert episodes[0]["webtoon_rating"] > 6.0
@@ -356,7 +356,7 @@ def test_download_episode_images():
         assert image_info[1]["width"] == 800
         assert image_info[1]["height"] == 714
         assert image_info[1]["id"] == "en-t2383-e1-2"
-        assert os.stat(media_files[2]).st_size == 728753
+        assert os.stat(media_files[2]).st_size == 732820
         combined = Image.open(media_files[2])
         assert combined.size == (800, 1706)
         assert exists(media_files[0])
