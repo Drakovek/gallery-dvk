@@ -41,9 +41,9 @@ def get_filename_from_page(page:dict, directory:str, filename_template:str="{tit
     if filename is None:
         filename = filename_template
     # Get the extension for the media type
-    try: extension = html_string_tools.html.get_extension(page["image_url"])
+    try: extension = html_string_tools.get_extension(page["image_url"])
     except KeyError:
-        try: extension = html_string_tools.html.get_extension(page["url"])
+        try: extension = html_string_tools.get_extension(page["url"])
         except KeyError: extension = ""
     if extension == "":
         extension = ".jpg"
@@ -555,7 +555,7 @@ class Extractor:
                 media_url = page["url"]
         # Download media
         if media_url is not None:
-            extension = html_string_tools.html.get_extension(media_url)
+            extension = html_string_tools.get_extension(media_url)
             if extension == "":
                 extension = ".jpg"
             media_file = abspath(join(full_directory, f"{filename}{extension}"))

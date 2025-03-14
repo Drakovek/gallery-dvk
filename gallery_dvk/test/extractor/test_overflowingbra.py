@@ -123,8 +123,8 @@ def test_get_stories():
                 + "into whatever is said about her. When the changes take her to a rowdy frat "\
                 + "party, what will she leave like...?"
         assert stories[0]["summary"] == summary
-        assert stories[0]["downloads"] > 2800
-        assert stories[0]["downloads"] < 3200
+        assert stories[0]["downloads"] > 3000
+        assert stories[0]["downloads"] < 4000
         assert stories[0]["id"] == "3197"
         # Test non-gallery page
         assert bra.get_stories("storyratings.htm?rateID=2888") == []

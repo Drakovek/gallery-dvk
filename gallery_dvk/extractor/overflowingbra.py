@@ -4,7 +4,7 @@ import os
 import re
 import shutil
 import tempfile
-import html_string_tools.html
+import html_string_tools
 import gallery_dvk.extractor.extractor
 import metadata_magic.file_tools as mm_file_tools
 import metadata_magic.rename as mm_rename
@@ -192,7 +192,7 @@ class OverflowingBra(gallery_dvk.extractor.extractor.Extractor):
                 return zip_media
             # Rename the extracted file
             extracted_file = abspath(join(temp_dir, files[0]))
-            extension = html_string_tools.html.get_extension(extracted_file)
+            extension = html_string_tools.get_extension(extracted_file)
             filename = mm_rename.get_available_filename([extracted_file], filename, parent_dir)
             new_file = abspath(join(parent_dir, f"{filename}{extension}"))
             shutil.move(extracted_file, new_file)

@@ -131,18 +131,18 @@ def test_get_episodes():
         assert episodes[0]["webtoon"] == "A Kat's (GOD AWFUL!!!) Blessing"
         assert episodes[0]["genre"] == "Comedy"
         assert episodes[0]["authors"] == ["Patricia Barton"]
-        assert episodes[0]["webtoon_views"] > 2500000
-        assert episodes[0]["webtoon_views"] < 3100000
-        assert episodes[0]["webtoon_subscribers"] > 20000
-        assert episodes[0]["webtoon_subscribers"] < 23000
+        assert episodes[0]["webtoon_views"] > 3000000
+        assert episodes[0]["webtoon_views"] < 4000000
+        assert episodes[0]["webtoon_subscribers"] > 25000
+        assert episodes[0]["webtoon_subscribers"] < 30000
         assert episodes[0]["webtoon_rating"] > 6.0
         assert episodes[0]["webtoon_rating"] < 8.0
         assert episodes[0]["webtoon_summary"].startswith("Katherine Jones, a seventeen-year-old")
         assert episodes[0]["title"] == "Prologue"
         assert episodes[0]["episode"] == 1
         assert episodes[0]["date"] == "2023-02-28"
-        assert episodes[0]["likes"] > 2000
-        assert episodes[0]["likes"] < 2800
+        assert episodes[0]["likes"] > 2800
+        assert episodes[0]["likes"] < 3500
         assert episodes[0]["url"] == "https://www.webtoons.com/en/canvas/a-kats-god-awful-blessing/prologue/viewer?title_no=847082&episode_no=1"
         # Test getting episodes with unique titles
         episodes = webtoon.get_episodes("en/romance/blades-of-furry/list?title_no=2383")
