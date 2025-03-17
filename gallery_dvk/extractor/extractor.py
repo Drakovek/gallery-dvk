@@ -331,9 +331,9 @@ class Extractor:
             # Check if table exists
             cursor = self.archive_connection.cursor()
             try:
-                result = cursor.execute("SELECT idtitle FROM identifiers")
+                result = cursor.execute("SELECT entry FROM archive")
             except sqlite3.OperationalError:
-                result = cursor.execute("CREATE TABLE identifiers(idtitle)")
+                result = cursor.execute("CREATE TABLE archive (entry TEXT PRIMARY KEY) WITHOUT ROWID")
             # Commit
             self.archive_connection.commit()
         except TypeError:
@@ -349,7 +349,7 @@ class Extractor:
         try:
             # Add identifier to the database table
             cursor = self.archive_connection.cursor()
-            result = cursor.execute(f"INSERT INTO identifiers VALUES ('{identifier}')")
+            result = cursor.execute(f"INSERT INTO archive VALUES ('{identifier}')")
             self.archive_connection.commit()
         except AttributeError: pass
     
@@ -366,7 +366,7 @@ class Extractor:
         try:
             # Search for identifier with the given name
             cursor = self.archive_connection.cursor()
-            result = cursor.execute(f"SELECT idtitle FROM identifiers WHERE idtitle='{identifier}'")
+            result = cursor.execute(f"SELECT entry FROM archive WHERE entry='{identifier}'")
             return result.fetchone() is not None
         except AttributeError:
             return False
