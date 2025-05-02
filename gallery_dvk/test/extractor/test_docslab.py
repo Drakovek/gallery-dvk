@@ -154,6 +154,9 @@ def test_get_submission_info():
         assert page["story_link"] is None
         assert page["art_link"] == "https://www.docs-lab.com/submissions/4657/new-zoo-geese"
         assert page["type"] == "story"
+    # Test getting info from an invalid page
+    with DocsLab([]) as docslab:
+        assert docslab.get_submission_info("3128/nola-day-2") is None
 
 def test_get_links_from_user():
     """

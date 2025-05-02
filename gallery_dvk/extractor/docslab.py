@@ -2,6 +2,7 @@
 
 import re
 import html_string_tools
+import python_print_tools
 import gallery_dvk.extractor.extractor
 from typing import List
 
@@ -40,9 +41,14 @@ class DocsLab(gallery_dvk.extractor.extractor.Extractor):
         :return: Whether download was successful
         :rtype: bool
         """
-        page = self.get_submission_info(section)
-        self.download_page(page, directory)
-        return True
+        try:
+            page = self.get_submission_info(section)
+            assert page is not None
+            self.download_page(page, directory)
+            return True
+        except AssertionError:
+            python_print_tools.color_print(f"Failed to download: {section}", "red")
+            return False
 
     def download_user(self, section:str, directory:str) -> bool:
         """
@@ -59,8 +65,13 @@ class DocsLab(gallery_dvk.extractor.extractor.Extractor):
         favs = "favorites" in self.include
         submissions = self.get_links_from_user(section, get_submissions=subs, get_favorites=favs)
         for submission in submissions:
-            page = self.get_submission_info(submission["section"], submission["rating"])
-            self.download_page(page, directory)
+            try:
+                page = self.get_submission_info(submission["section"], submission["rating"])
+                assert page is not None
+                self.download_page(page, directory)
+            except AssertionError:
+                python_print_tools.color_print(f"Failed to download: {submission['section']}", "red")
+                return False
         return True
 
     def get_info_from_config(self, config:dict, category:str):
@@ -155,8 +166,11 @@ class DocsLab(gallery_dvk.extractor.extractor.Extractor):
         # Load the submission page
         bs = self.web_get(submission["url"])
         # Get the title
-        title = bs.find("h2", {"style":re.compile("[A-Za-z]+")}).get_text()
-        submission["title"] = title.strip()
+        try:
+            title = bs.find("h2", {"style":re.compile("[A-Za-z]+")}).get_text()
+            submission["title"] = title.strip()
+        except AttributeError:
+            return None
         # Get the artist
         artist_element = bs.find("a", {"href":re.compile(r"profiles\/")}).find("strong")
         artist = artist_element.get_text()
