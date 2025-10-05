@@ -122,7 +122,7 @@ class TGComics(gd_extractor.Extractor):
         # Get the author
         try:
             authors = []
-            for author_element in entry_header.find_all("a", {"href":re.compile(r"\/tgc\/author\/")}):
+            for author_element in list(entry_header.find_all("a", {"href":re.compile(r"\/tgc\/author\/")})):
                 authors.append(author_element.get_text().strip())
             assert len(authors) > 0
             info["authors"] = authors
@@ -140,6 +140,7 @@ class TGComics(gd_extractor.Extractor):
         category_elements = None
         try:
             category_elements = beautiful_soup.find("div", {"class":"omsc-toggle-inner"}).find_all("p")
+            category_elements = list(category_elements)
             rating_element = gd_extractor.get_element_with_string(category_elements, re.compile(r"[Rr]atings:"), True)
             info["age_rating"] = re.sub(strip_regex, "", str(rating_element)).strip()
             assert rating_element is not None and not info["age_rating"] == ""

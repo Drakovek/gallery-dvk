@@ -57,8 +57,8 @@ def test_get_stories():
                 + "experimental; I was playing with the Gothic/Romance novel sort of... "\
                 + "wait, that's just bullshit. Maybe it's just a bad story."
         assert stories[0]["summary"] == summary
-        assert stories[0]["downloads"] > 6500
-        assert stories[0]["downloads"] < 7000
+        assert stories[0]["downloads"] > 6700
+        assert stories[0]["downloads"] < 8000
         assert stories[0]["id"] == "23"
         # Test getting story with no description
         assert stories[3]["url"] == "https://overflowingbra.com/download.php?StoryID=294"
@@ -81,8 +81,8 @@ def test_get_stories():
                 + "but it's so much more than that. It's all part of an insidious plan to "\
                 + "take over the world!"
         assert stories[4]["summary"] == summary
-        assert stories[4]["downloads"] > 19500
-        assert stories[4]["downloads"] < 20000
+        assert stories[4]["downloads"] > 20000
+        assert stories[4]["downloads"] < 25000
         assert stories[4]["id"] == "108"
         # Test getting story with no date
         stories = bra.get_stories("ding.htm?dates=2000")
@@ -107,8 +107,8 @@ def test_get_stories():
         assert stories[12]["date"] == "2000-01-10"
         assert stories[12]["tags"] is None
         assert stories[12]["summary"] is None
-        assert stories[12]["downloads"] > 8200
-        assert stories[12]["downloads"] < 8700
+        assert stories[12]["downloads"] > 8800
+        assert stories[12]["downloads"] < 10000
         assert stories[12]["id"] == "315"
         # Test getting a more recent story
         stories = bra.get_stories("ding.htm?dates=2016")

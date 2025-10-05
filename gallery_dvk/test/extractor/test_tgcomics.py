@@ -658,6 +658,8 @@ def test_with_login():
             tgcomics.archive_file = archive_file
             tgcomics.open_archive()
             tgcomics.write_metadata = True
+            tgcomics.webpage_sleep = 3.0
+            tgcomics.download_sleep = 3.0
             # Test logging in
             if tgcomics.username is None or tgcomics.password is None:
                 raise Exception("TGComics Username and Password must be provided in a user config file to perform this test.")

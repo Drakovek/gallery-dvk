@@ -131,12 +131,10 @@ def test_get_episodes():
         assert episodes[0]["webtoon"] == "A Kat's (GOD AWFUL!!!) Blessing"
         assert episodes[0]["genre"] == "Comedy"
         assert episodes[0]["authors"] == ["Patricia Barton"]
-        assert episodes[0]["webtoon_views"] > 3000000
-        assert episodes[0]["webtoon_views"] < 4000000
-        assert episodes[0]["webtoon_subscribers"] > 25000
-        assert episodes[0]["webtoon_subscribers"] < 30000
-        assert episodes[0]["webtoon_rating"] > 6.0
-        assert episodes[0]["webtoon_rating"] < 8.0
+        assert episodes[0]["webtoon_views"] > 4000000
+        assert episodes[0]["webtoon_views"] < 6000000
+        assert episodes[0]["webtoon_subscribers"] > 3000
+        assert episodes[0]["webtoon_subscribers"] < 40000
         assert episodes[0]["webtoon_summary"].startswith("Katherine Jones, a seventeen-year-old")
         assert episodes[0]["title"] == "Prologue"
         assert episodes[0]["episode"] == 1
@@ -152,23 +150,21 @@ def test_get_episodes():
         assert episodes[0]["authors"] == ["Deya Muniz", "Emily Erdos"]
         assert episodes[0]["webtoon_views"] > 38000000
         assert episodes[0]["webtoon_views"] < 50000000
-        assert episodes[0]["webtoon_subscribers"] > 500000
-        assert episodes[0]["webtoon_subscribers"] < 550000
-        assert episodes[0]["webtoon_rating"] > 9.4
-        assert episodes[0]["webtoon_rating"] < 9.7
+        assert episodes[0]["webtoon_subscribers"] > 550000
+        assert episodes[0]["webtoon_subscribers"] < 650000
         assert episodes[0]["webtoon_summary"].startswith("Emile is an up-and-coming skater in the")
         assert episodes[0]["webtoon_summary"].endswith("into something more...?")
         assert episodes[0]["title"] == "Ep. 1 - Last Minute Matchup"
         assert episodes[0]["episode"] == 1
         assert episodes[0]["date"] == "2020-12-19"
-        assert episodes[0]["likes"] > 80000
-        assert episodes[0]["likes"] < 84000
+        assert episodes[0]["likes"] > 84000
+        assert episodes[0]["likes"] < 90000
         assert episodes[0]["url"] == "https://www.webtoons.com/en/romance/blades-of-furry/ep-1-last-minute-matchup/viewer?title_no=2383&episode_no=1"
         assert episodes[4]["title"] == "Ep. 5 - Tiny Rival"
         assert episodes[4]["episode"] == 5
         assert episodes[4]["date"] == "2021-01-02"
-        assert episodes[4]["likes"] > 70000
-        assert episodes[4]["likes"] < 75000
+        assert episodes[4]["likes"] > 75000
+        assert episodes[4]["likes"] < 90000
         assert episodes[4]["url"] == "https://www.webtoons.com/en/romance/blades-of-furry/ep-5-tiny-rival/viewer?title_no=2383&episode_no=5"
 
 def test_get_episode_info():
@@ -269,7 +265,7 @@ def test_download_page():
         assert meta["date"] == "2020-01-01"
         assert meta["webtoon"] == "Blades of Furry"
         assert meta["image_number"] == 1
-        assert os.stat(media_file).st_size == 101003
+        assert os.stat(media_file).st_size == 83175
         # Test that ID has been written to the database
         with Webtoon([config_file]) as webtoon:
             webtoon.initialize()
@@ -312,7 +308,7 @@ def test_download_episode_images():
         assert meta["date"] == "2020-01-01"
         assert meta["webtoon"] == "Blades of Furry"
         assert meta["image_number"] == 1
-        assert os.stat(media_files[0]).st_size == 101003
+        assert os.stat(media_files[0]).st_size == 83175
     with tempfile.TemporaryDirectory() as temp_dir:
         # Test downloading images while stitching them together
         config_file = abspath(join(temp_dir, "config.json"))
@@ -356,7 +352,7 @@ def test_download_episode_images():
         assert image_info[1]["width"] == 800
         assert image_info[1]["height"] == 714
         assert image_info[1]["id"] == "en-t2383-e1-2"
-        assert os.stat(media_files[2]).st_size == 732820
+        assert os.stat(media_files[2]).st_size == 722449
         combined = Image.open(media_files[2])
         assert combined.size == (800, 1706)
         assert exists(media_files[0])

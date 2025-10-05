@@ -178,10 +178,6 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
         subscribe_string = re.sub(r"^\s+|\s+$", "", subscribe_element.get_text())
         subscribe_string = re.sub(r"[\.,]", "", subscribe_string)
         base["webtoon_subscribers"] = int(subscribe_string)
-        # Get the webtoon rating
-        rating_element = aside.find("em", {"id":"_starScoreAverage"})
-        rating_string = re.sub(r"^\s+|\s+$", "", rating_element.get_text()).replace(",", ".")
-        base["webtoon_rating"] = float(rating_string)
         # Get the webtoon summary
         summary_element = bs.find("p", {"class":"summary"})
         base["webtoon_summary"] = re.sub(r"^\s+|\s+$", "", summary_element.get_text())

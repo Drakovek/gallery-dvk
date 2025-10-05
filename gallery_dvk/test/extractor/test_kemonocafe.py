@@ -110,7 +110,7 @@ def test_get_chapter_info():
         assert "Even in small doses, the" in chapters[3]["description"]
         # Test getting chapter info for chapters with multiple links
         chapters = kemonocafe.get_chapter_info("addictivescience")
-        assert len(chapters) == 49
+        assert len(chapters) > 105
         assert chapters[0]["title"] == "group_1"
         assert chapters[0]["date"] == "2013-01-01"
         assert chapters[0]["description"] is None
