@@ -5,7 +5,6 @@ import bs4
 import copy
 import gallery_dvk
 import gallery_dvk.extractor.extractor as gd_extractor
-import metadata_magic.file_tools as mm_file_tools
 from typing import List
 
 def get_cover_page(collection_page:dict) -> dict:

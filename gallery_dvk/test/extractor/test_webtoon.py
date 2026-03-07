@@ -2,7 +2,7 @@
 
 import os
 import tempfile
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 from gallery_dvk.extractor.webtoon import Webtoon, stitch_images
 from os.path import abspath, basename, exists, join
 from PIL import Image
@@ -91,7 +91,7 @@ def test_get_info_from_config():
     with tempfile.TemporaryDirectory() as temp_dir:
         config_file = abspath(join(temp_dir, "config.json"))
         config = {"webtoon":{"archive":"/file/path/"}, "other":{"archive":"thing"}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         assert exists(config_file)
         with Webtoon([config_file]) as webtoon:
             assert webtoon.archive_file == "/file/path/"
@@ -99,12 +99,12 @@ def test_get_info_from_config():
             assert not webtoon.write_metadata
         # Test getting the download_stories variable
         config = {"webtoon":{"stitch_images":False}, "other":{"metadata":False}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Webtoon([config_file]) as webtoon:
             assert not webtoon.stitch_images
         # Test getting the download_artwork variable
         config = {"webtoon":{"only_stitched":True}, "other":{"metadata":False}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Webtoon([config_file]) as webtoon:
             assert webtoon.only_stitched
 
@@ -232,7 +232,7 @@ def test_download_page():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "webtoon.db"))
         config = {"webtoon":{"archive":archive_file, "metadata":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Webtoon([config_file]) as webtoon:
             webtoon.initialize()
             json = {"title":"BoF Episode 1"}
@@ -258,7 +258,7 @@ def test_download_page():
         assert exists(episode_folder)
         json_file = abspath(join(episode_folder, "en-t2383-e1-1_BoF Episode 1.json"))
         assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "BoF Episode 1"
         assert meta["url"] == "https://www.webtoons.com/en/romance/blades-of-furry/ep-1-last-minute-matchup/viewer?title_no=2383&episode_no=1"
         assert meta["image_url"] == "https://webtoon-phinf.pstatic.net/20231223_195/1703287617653PTwO0_JPEG/17032876176186155_EP1_1.jpg?type=q90"
@@ -282,7 +282,7 @@ def test_download_episode_images():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "webtoon.db"))
         config = {"webtoon":{"archive":archive_file, "metadata":True, "stitch_images":False}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Webtoon([config_file]) as webtoon:
             json = dict()
             json["title"] = "Blades of Furry 1"
@@ -301,7 +301,7 @@ def test_download_episode_images():
         assert exists(episode_folder)
         json_file = abspath(join(episode_folder, "en-t2383-e1-1_Blades of Furry 1.json"))
         assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "Blades of Furry 1"
         assert meta["url"] == "https://www.webtoons.com/en/romance/blades-of-furry/ep-1-last-minute-matchup/viewer?title_no=2383&episode_no=1"
         assert meta["image_url"] == "https://webtoon-phinf.pstatic.net/20201215_23/1607986880350l3WlD_JPEG/1607986880287238318.jpg?type=q90"
@@ -314,7 +314,7 @@ def test_download_episode_images():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "webtoon.db"))
         config = {"webtoon":{"archive":archive_file, "metadata":True, "stitch_images":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Webtoon([config_file]) as webtoon:
             json2 = {}
             json2["title"] = "Blades of Furry 1"
@@ -335,7 +335,7 @@ def test_download_episode_images():
         assert exists(episode_folder)
         json_file = abspath(join(episode_folder, "en-t2383-e1_Blades of Furry 1.json"))
         assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "Blades of Furry 1"
         assert meta["url"] == "https://www.webtoons.com/en/romance/blades-of-furry/ep-1-last-minute-matchup/viewer?title_no=2383&episode_no=1"
         assert meta["date"] == "2020-01-01"
@@ -363,7 +363,7 @@ def test_download_episode_images():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "webtoon.db"))
         config = {"webtoon":{"archive":archive_file, "metadata":True, "stitch_images":True, "only_stitched":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Webtoon([config_file]) as webtoon:
             media_files = webtoon.download_episode_images([json, json2], temp_dir)
             assert len(media_files) == 1
@@ -377,7 +377,7 @@ def test_download_episode_images():
         assert files[0] == "en-t2383-e1_Blades of Furry 1.json"
         assert files[1] == "en-t2383-e1_Blades of Furry 1.png"
         json_file = abspath(join(episode_folder, "en-t2383-e1_Blades of Furry 1.json"))
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "Blades of Furry 1"
         assert meta["url"] == "https://www.webtoons.com/en/romance/blades-of-furry/ep-1-last-minute-matchup/viewer?title_no=2383&episode_no=1"
         assert meta["date"] == "2020-01-01"

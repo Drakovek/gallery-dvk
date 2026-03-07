@@ -4,7 +4,7 @@ import os
 import re
 import bs4
 import tempfile
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 import gallery_dvk.extractor.extractor as gd_extractor
 from gallery_dvk.extractor.extractor import Extractor
 from os.path import abspath, basename, exists, join
@@ -23,7 +23,7 @@ def test_get_filename_from_page():
         assert gd_extractor.get_filename_from_page(page, temp_dir, "website-{title}") == "website-New" 
         assert gd_extractor.get_filename_from_page(page, temp_dir, "{date}_{id}_{artist}") == "2012-12-21_1234_Person" 
         # Test if there is an existing media file with the same name and different extension
-        mm_file_tools.write_text_file(abspath(join(temp_dir, "duplicate.jpg")), "TEST")
+        pft.write_text_file(abspath(join(temp_dir, "duplicate.jpg")), "TEST")
         page = {"title":"duplicate", "image_url":"blah/thing.png"}
         assert gd_extractor.get_filename_from_page(page, temp_dir) == "duplicate"
         page = {"title":"duplicate", "url":"blah/thing.txt"}
@@ -34,9 +34,9 @@ def test_get_filename_from_page():
         page = {"title":"duplicate", "url":"blah/thing.jpg"}
         assert gd_extractor.get_filename_from_page(page, temp_dir) == "duplicate-2"
         # Test if there is an existing json file with the same name
-        mm_file_tools.write_json_file(abspath(join(temp_dir, "new.json")), {"key":"value"})
-        mm_file_tools.write_json_file(abspath(join(temp_dir, "new-2.html")), {"key":"value"})
-        mm_file_tools.write_json_file(abspath(join(temp_dir, "new-3.txt")), {"key":"value"})
+        pft.write_json_file(abspath(join(temp_dir, "new.json")), {"key":"value"})
+        pft.write_json_file(abspath(join(temp_dir, "new-2.html")), {"key":"value"})
+        pft.write_json_file(abspath(join(temp_dir, "new-3.txt")), {"key":"value"})
         page = {"title":"new", "image_url":"blah/thing.txt"}
         assert gd_extractor.get_filename_from_page(page, temp_dir) == "new-4"
         page = {"title":"new", "url":"blah/thing.png"}
@@ -275,7 +275,7 @@ def test_get_info_from_config():
         # Test getting the archive_file from the config file
         config_file = abspath(join(temp_dir, "config.json"))
         config = {"thing":{"archive":"/file/path/"}, "other":{"archive":"thing"}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         assert exists(config_file)
         with Extractor("thing", [config_file]) as extractor:
             assert extractor.archive_file == "/file/path/"
@@ -283,28 +283,28 @@ def test_get_info_from_config():
             assert not extractor.write_metadata
         # Test getting the write_metadata variable
         config = {"thing":{"metadata":True}, "other":{"metadata":False}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Extractor("thing", [config_file]) as extractor:
             assert extractor.write_metadata
         # Test getting the included variable
         config = {"thing":{"include":["gallery", "scraps"]}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Extractor("thing", [config_file]) as extractor:
             assert extractor.include == ["gallery", "scraps"]
         # Test getting the username and password variables
         config = {"thing":{"username":"Person", "password":"other"}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Extractor("thing", [config_file]) as extractor:
             assert extractor.username == "Person"
             assert extractor.password == "other"
         # Test getting the filename_format
         config = {"thing":{"filename_format":"[{date}] {title}"}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Extractor("thing", [config_file]) as extractor:
             assert extractor.filename_format == "[{date}] {title}"
         # Test getting sleep values
         config = {"thing":{"sleep-request":2.5, "sleep":3}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Extractor("thing", [config_file]) as extractor:
             assert extractor.webpage_sleep == 2.5
             assert extractor.download_sleep == 3
@@ -322,7 +322,7 @@ def test_get_info_from_config():
             assert extractor.download_sleep == 1.5
         # Test getting extractor in gallery-dl format    
         config = {"extractor":{"new":{"include":["different","things"], "sleep":2.3}}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Extractor("new", [config_file]) as extractor:
             assert extractor.include == ["different","things"]
             assert extractor.download_sleep == 2.3
@@ -335,7 +335,7 @@ def test_get_info_from_config():
         config["filename_format"] = False
         config["webpage_sleep"] = "thing"
         config["download_sleep"] = "thing"
-        mm_file_tools.write_json_file(config_file, {"thing":config})
+        pft.write_json_file(config_file, {"thing":config})
         with Extractor("thing", [config_file]) as extractor:
             assert extractor.archive_file is None
             assert extractor.archive_connection is None
@@ -367,7 +367,7 @@ def test_open_archive():
         config_file = abspath(join(temp_dir, "config.json"))
         database_file = abspath(join(temp_dir, "data.sqlite3"))
         config = {"thing":{"archive":database_file}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         assert exists(config_file)
         assert not exists(database_file)
         with Extractor("thing", [config_file]) as extractor:
@@ -392,7 +392,7 @@ def test_add_to_archive():
         config_file = abspath(join(temp_dir, "config.json"))
         database_file = abspath(join(temp_dir, "data.sqlite3"))
         config = {"thing":{"archive":database_file}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         assert exists(config_file)
         assert not exists(database_file)
         with Extractor("thing", [config_file]) as extractor:
@@ -421,7 +421,7 @@ def test_archive_contains():
         config_file = abspath(join(temp_dir, "config.json"))
         database_file = abspath(join(temp_dir, "data.sqlite3"))
         config = {"thing":{"archive":database_file}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         assert exists(config_file)
         assert not exists(database_file)
         with Extractor("thing", [config_file]) as extractor:
@@ -503,7 +503,7 @@ def test_download_page():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "test.sqlite3"))
         config = {"thing":{"archive":archive_file, "metadata":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         # Test downloading to same directory, adding date
         with Extractor("thing", [config_file]) as extractor:
             media_file = extractor.download_page(page, temp_dir)
@@ -513,7 +513,7 @@ def test_download_page():
         json_file = abspath(join(temp_dir, "Thing!.json"))
         assert exists(json_file)
         assert os.stat(media_file).st_size == 39785
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "Thing!"
         assert meta["url"] == "https://www.pythonscraping.com/img/gifts/img6.jpg"
         assert meta["date"] == "2014-08-04"
@@ -526,8 +526,8 @@ def test_download_page():
             assert extractor.archive_contains("/not/important/")
         json_file = abspath(join(temp_dir, "Other.json"))
         assert exists(json_file)
-        assert mm_file_tools.read_text_file(media_file) == "This is a text file!"
-        meta = mm_file_tools.read_json_file(json_file)
+        assert pft.read_text_file(media_file) == "This is a text file!"
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "Other"
         assert meta["url"] == "/not/important/"
         assert meta["date"] == "2023-01-01"
@@ -552,10 +552,10 @@ def test_download_page():
         json_file = abspath(join(sub, "[2017-10-31] Title - Revelations.json"))
         assert exists(json_file)
         assert os.stat(media_file).st_size == 85007
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         text_file = abspath(join(sub, "[2017-10-31] Title - Revelations.html"))
         assert exists(text_file)
-        assert mm_file_tools.read_text_file(text_file) == "<!DOCTYPE html><html>thing!</html>"
+        assert pft.read_text_file(text_file) == "<!DOCTYPE html><html>thing!</html>"
         assert meta["title"] == "Title: Revelations"
         assert meta["url"] == "blah"
         assert meta["image_url"] == "https://www.pythonscraping.com/img/gifts/img4.jpg"
@@ -581,7 +581,7 @@ def test_download_page():
             assert not exists(abspath(join(temp_dir, "other")))
         # Test if there is an existing media file with the same name
         duplicate_media = abspath(join(temp_dir, "duplicate.jpg"))
-        mm_file_tools.write_text_file(duplicate_media, "Contents")
+        pft.write_text_file(duplicate_media, "Contents")
         page = {"title":"duplicate", "url": "https://www.pythonscraping.com/img/gifts/img3.jpg", "description":"other"}
         with Extractor("thing", [config_file]) as extractor:
             media_file = extractor.download_page(page, temp_dir)
@@ -590,15 +590,15 @@ def test_download_page():
         json_file = abspath(join(temp_dir, "duplicate-2.json"))
         assert exists(duplicate_media)
         assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "duplicate"
         assert meta["url"] == "https://www.pythonscraping.com/img/gifts/img3.jpg"
         assert meta["description"] == "other"
         assert os.stat(media_file).st_size == 71638
-        assert mm_file_tools.read_text_file(duplicate_media) == "Contents"
+        assert pft.read_text_file(duplicate_media) == "Contents"
         # Test if there is an existing JSON wile with the same name
         duplicate_json = abspath(join(temp_dir, "unique.json"))
-        mm_file_tools.write_json_file(duplicate_json, {"some":"key"})
+        pft.write_json_file(duplicate_json, {"some":"key"})
         page = {"title":"unique", "url": "https://www.pythonscraping.com/img/gifts/img1.jpg", "description":"New"}
         with Extractor("thing", [config_file]) as extractor:
             media_file = extractor.download_page(page, temp_dir)
@@ -607,15 +607,15 @@ def test_download_page():
         json_file = abspath(join(temp_dir, "unique-2.json"))
         assert exists(duplicate_json)
         assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "unique"
         assert meta["url"] == "https://www.pythonscraping.com/img/gifts/img1.jpg"
         assert meta["description"] == "New"
         assert os.stat(media_file).st_size == 84202
-        assert mm_file_tools.read_json_file(duplicate_json) == {"some":"key"}
+        assert pft.read_json_file(duplicate_json) == {"some":"key"}
         # Test if the extractor is set to not use metadata
         config = {"thing":{"archive":archive_file, "metadata":False}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         page = {"title":"No Meta", "url": "https://www.pythonscraping.com/img/gifts/img2.jpg"}
         with Extractor("thing", [config_file]) as extractor:
             media_file = extractor.download_page(page, temp_dir)

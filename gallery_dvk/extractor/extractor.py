@@ -14,7 +14,7 @@ import gallery_dvk.config
 import html_string_tools
 import python_print_tools.printer
 import metadata_magic.rename as mm_rename
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 from os.path import abspath, exists, join
 from typing import List
 
@@ -49,7 +49,7 @@ def get_filename_from_page(page:dict, directory:str, filename_template:str="{tit
         extension = ".jpg"
     # Get the filename that is available
     extensions = [".json", ".htm", ".html", ".txt", extension]
-    filename = mm_rename.get_available_filename(extensions, filename, directory)
+    filename = pft.get_available_filename(extensions, filename, directory)
     # Return the filename
     return filename
 
@@ -529,7 +529,7 @@ class Extractor:
         # Create subfolders if necessary
         full_directory = abspath(directory)
         for sub in subs:
-            full_directory = abspath(join(full_directory, mm_rename.get_file_friendly_text(sub)))
+            full_directory = abspath(join(full_directory, pft.get_file_friendly_text(sub)))
             if not exists(full_directory):
                 os.mkdir(full_directory)
         # Get filename
@@ -544,7 +544,7 @@ class Extractor:
             if text.startswith("<!DOCTYPE html>"):
                 extension = ".html"
             media_file = abspath(join(full_directory, f"{filename}{extension}"))
-            mm_file_tools.write_text_file(media_file, text)
+            pft.write_text_file(media_file, text)
         except (AttributeError, KeyError): pass
         # Get media URL
         media_url = None
@@ -570,7 +570,7 @@ class Extractor:
         # Write JSON file
         if self.write_metadata:
             json_file = abspath(join(full_directory, f"{filename}.json"))
-            mm_file_tools.write_json_file(json_file, updated_page)
+            pft.write_json_file(json_file, updated_page)
         # Add identifier to the database
         self.add_to_archive(identifier)
         return media_file

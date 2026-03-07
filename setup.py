@@ -11,7 +11,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gallery-dvk",
-    version="0.5.2",
+    version="0.6.0",
     author="Drakovek",
     author_email="DrakovekMail@gmail.com",
     description="Utility for downloading media from various image hosting websites.",
@@ -25,6 +25,7 @@ setuptools.setup(
                 "Metadata-Magic",
                 "Pillow",
                 "Python-Print-Tools",
+                "Python-File-Tools",
                 "requests",
                 "tqdm"],
     classifiers=[

@@ -3,7 +3,7 @@
 import os
 import tempfile
 import gallery_dvk.extractor.tgcomics
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 from gallery_dvk.extractor.tgcomics import TGComics
 from os.path import abspath, basename, exists, join
 
@@ -106,7 +106,7 @@ def get_categories_test(tgcomics:TGComics):
     bs = tgcomics.web_get("https://tgcomics.com/tgc/comics/angelas-trick-n-treat-2020/")
     info = tgcomics.get_categories(bs)
     assert info["title"] == "Angela’s Tyler’s Trick ’n Treat (2020 Edition)"
-    assert info["artists"] == ["TGTrinity", "NotZackforWork"]
+    assert info["artists"] == ["Tyler Adams (TGTrinity)", "NotZackforWork"]
     assert info["authors"] is None
     assert info["age_rating"] is None
     assert info["genres"] is None
@@ -630,7 +630,7 @@ def download_page_test(tgcomics:TGComics, temp_dir:str):
     assert exists(media_dir)
     json_file = abspath(join(media_dir, "Out of Town [Page 2].json"))
     assert exists(json_file)
-    meta = mm_file_tools.read_json_file(json_file)
+    meta = pft.read_json_file(json_file)
     assert meta["title"] == "Out of Town [Page 2]"
     assert meta["artists"] == ["Kittyhawk"]
     assert meta["authors"] == ["Ankan"]

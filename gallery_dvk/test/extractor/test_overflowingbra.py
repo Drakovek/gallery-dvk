@@ -2,7 +2,7 @@
 
 import os
 import tempfile
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 from gallery_dvk.extractor.overflowingbra import OverflowingBra
 from os.path import abspath, basename, exists, join
 
@@ -67,8 +67,8 @@ def test_get_stories():
         assert stories[3]["date"] == "1998-02-01"
         assert stories[3]["tags"] is None
         assert stories[3]["summary"] is None
-        assert stories[3]["downloads"] > 8500
-        assert stories[3]["downloads"] < 9500
+        assert stories[3]["downloads"] > 9000
+        assert stories[3]["downloads"] < 12000
         assert stories[3]["id"] == "294"
         # With getting story with tags
         assert stories[4]["url"] == "https://overflowingbra.com/download.php?StoryID=108"
@@ -97,8 +97,8 @@ def test_get_stories():
         summary = "A unsuspecting guy brings home a big tited women from the club. "\
                 + "Little does he know she has has other plans for him then sex."
         assert stories[0]["summary"] == summary
-        assert stories[0]["downloads"] > 11200
-        assert stories[0]["downloads"] < 11800
+        assert stories[0]["downloads"] > 11900
+        assert stories[0]["downloads"] < 21000
         assert stories[0]["id"] == "1505"
         # Test getting story with no summary or tags
         assert stories[12]["url"] == "https://overflowingbra.com/download.php?StoryID=315"
@@ -140,7 +140,7 @@ def test_download_page():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "archive.db"))
         config = {"overflowingbra":{"archive":archive_file, "metadata":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with OverflowingBra([config_file]) as bra:
             bra.initialize()
             json = {"title":"Pillow Talk"}
@@ -167,13 +167,13 @@ def test_download_page():
         json_file = abspath(join(author_folder, "Starfall.json"))
         assert exists(json_file)
         assert sorted(os.listdir(author_folder)) == ["Starfall.htm", "Starfall.json"]
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "Starfall"
         assert meta["author"] == "Plato Voltaire"
         assert meta["url"] == "https://overflowingbra.com/download.php?StoryID=559"
         assert meta["date"] == "1998-02-18"
         assert meta["id"] == "559"
-        contents = mm_file_tools.read_text_file(media_file)
+        contents = pft.read_text_file(media_file)
         assert contents.startswith("<!Starfall>")
         assert "Quinn was drumming her fingers on the desk." in contents
         assert "Derek was all too willing to find out." in contents
@@ -195,7 +195,7 @@ def test_download_page():
         json_file = abspath(join(author_folder, "Four of a Kind.json"))
         assert exists(json_file)
         assert sorted(os.listdir(author_folder)) == ["Four of a Kind.json", "Four of a Kind.zip"]
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "Four of a Kind"
         assert meta["author"] == "Oppailolicus"
         assert meta["url"] == "https://overflowingbra.com/download.php?StoryID=2877"

@@ -2,7 +2,7 @@
 
 import os
 import tempfile
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 from gallery_dvk.extractor.docslab import DocsLab
 from os.path import abspath, basename, exists, join
 
@@ -63,7 +63,7 @@ def test_get_info_from_config():
     with tempfile.TemporaryDirectory() as temp_dir:
         config_file = abspath(join(temp_dir, "config.json"))
         config = {"docslab":{"archive":"/file/path/"}, "other":{"archive":"thing"}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         assert exists(config_file)
         with DocsLab([config_file]) as docslab:
             assert docslab.archive_file == "/file/path/"
@@ -71,12 +71,12 @@ def test_get_info_from_config():
             assert not docslab.write_metadata
         # Test getting the download_stories variable
         config = {"docslab":{"download_stories":True}, "other":{"metadata":False}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with DocsLab([config_file]) as docslab:
             assert docslab.download_stories
         # Test getting the download_artwork variable
         config = {"docslab":{"download_artwork":True}, "other":{"metadata":False}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with DocsLab([config_file]) as docslab:
             assert docslab.download_artwork
 
@@ -166,7 +166,7 @@ def test_get_links_from_user():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "docslab.db"))
         config = {"docslab":{"archive":archive_file, "metadata":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with DocsLab([config_file]) as docslab:
             # Test getting submissions
             links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
@@ -216,7 +216,7 @@ def test_download_page():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "docslab.db"))
         config = {"docslab":{"archive":archive_file, "metadata":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with DocsLab([config_file]) as docslab:
             docslab.initialize()
             json = {"title":"A Party to Remember"}
@@ -245,15 +245,15 @@ def test_download_page():
         assert exists(artist_folder)
         json_file = abspath(join(artist_folder, "2434_Reflect On That, Chess.json"))
         assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["id"] == "2434"
         assert meta["title"] == "Reflect On That, Chess"
         assert meta["artist"] == "kayemarquet"
         assert meta["url"] == "https://www.docs-lab.com/submissions/2434/reflect-on-that-chess"
-        assert mm_file_tools.read_text_file(media_file) == "<!DOCTYPE html><html>Test!</html>"
+        assert pft.read_text_file(media_file) == "<!DOCTYPE html><html>Test!</html>"
         # Test downloading a story submission with an image
         config = {"docslab":{"archive":archive_file, "metadata":True, "download_artwork":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with DocsLab([config_file]) as docslab:
             json = {"title":"New Zoo-Bears"}
             json["id"] = "2585"
@@ -270,16 +270,16 @@ def test_download_page():
         assert exists(artist_folder)
         json_file = abspath(join(artist_folder, "2585_New Zoo-Bears.json"))
         assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["id"] == "2585"
         assert meta["title"] == "New Zoo-Bears"
         assert meta["artist"] == "wallace111"
         assert meta["url"] == "https://www.docs-lab.com/submissions/2585/new-zoo-bears"
         assert meta["art_link"] == "https://www.docs-lab.com/submissions/4701/new-zoo-bears"
-        assert mm_file_tools.read_text_file(media_file) == "<!DOCTYPE html><html>Other</html>"
+        assert pft.read_text_file(media_file) == "<!DOCTYPE html><html>Other</html>"
         art_json = abspath(join(artist_folder, "4701_New Zoo-Bears.json"))
         assert exists(art_json)
-        meta = mm_file_tools.read_json_file(art_json)
+        meta = pft.read_json_file(art_json)
         assert meta["id"] == "4701"
         assert meta["title"] == "New Zoo-Bears"
         assert meta["artist"] == "wallace111"
@@ -290,7 +290,7 @@ def test_download_page():
         assert os.stat(art_media).st_size == 598728
         # Test downloading an image submission with a story
         config = {"docslab":{"archive":archive_file, "metadata":True, "download_stories":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with DocsLab([config_file]) as docslab:
             json = {"title":"New Zoo-Geese"}
             json["id"] = "4657"
@@ -307,7 +307,7 @@ def test_download_page():
         assert exists(artist_folder)
         json_file = abspath(join(artist_folder, "4657_New Zoo-Geese.json"))
         assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["id"] == "4657"
         assert meta["title"] == "New Zoo-Geese"
         assert meta["artist"] == "wallace111"
@@ -317,14 +317,14 @@ def test_download_page():
         assert os.stat(media_file).st_size == 736493
         story_json = abspath(join(artist_folder, "2574_New Zoo-Geese.json"))
         assert exists(story_json)
-        meta = mm_file_tools.read_json_file(story_json)
+        meta = pft.read_json_file(story_json)
         assert meta["id"] == "2574"
         assert meta["title"] == "New Zoo-Geese"
         assert meta["artist"] == "wallace111"
         assert meta["url"] == "https://www.docs-lab.com/submissions/2574/new-zoo-geese"
         story_file = abspath(join(artist_folder, "2574_New Zoo-Geese.html"))
         assert exists(story_file)
-        text = mm_file_tools.read_text_file(story_file)
+        text = pft.read_text_file(story_file)
         assert "A family walked under the stone" in text
         # Test that submission IDs were added to the archive
         with DocsLab([config_file]) as docslab:

@@ -4,7 +4,7 @@ import os
 import re
 import argparse
 import python_print_tools.printer
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 from gallery_dvk.extractor.docslab import DocsLab
 from gallery_dvk.extractor.kemonocafe import KemonoCafe
 from gallery_dvk.extractor.overflowingbra import OverflowingBra
@@ -67,7 +67,7 @@ class GalleryDVK():
         try:
             # Get lines from the text file
             lines = []
-            text = mm_file_tools.read_text_file(file)
+            text = pft.read_text_file(file)
             split = text.split("\n")
             for item in split:
                 lines.extend(item.split("\r"))

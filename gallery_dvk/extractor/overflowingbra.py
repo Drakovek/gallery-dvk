@@ -6,8 +6,7 @@ import shutil
 import tempfile
 import html_string_tools
 import gallery_dvk.extractor.extractor
-import metadata_magic.file_tools as mm_file_tools
-import metadata_magic.rename as mm_rename
+import python_file_tools as pft
 from os.path import abspath, basename, exists, join
 from typing import List
 
@@ -185,7 +184,7 @@ class OverflowingBra(gallery_dvk.extractor.extractor.Extractor):
         shutil.move(media_file, zip_media)
         # Extract ZIP into a temporary directory
         with tempfile.TemporaryDirectory() as temp_dir:
-            mm_file_tools.extract_zip(zip_media, temp_dir,  remove_internal=True)
+            pft.extract_zip(zip_media, temp_dir,  remove_internal=True)
             files = os.listdir(temp_dir)
             # Return the ZIP file if it contains more than one file
             if not len(files) == 1:
@@ -193,7 +192,7 @@ class OverflowingBra(gallery_dvk.extractor.extractor.Extractor):
             # Rename the extracted file
             extracted_file = abspath(join(temp_dir, files[0]))
             extension = html_string_tools.get_extension(extracted_file)
-            filename = mm_rename.get_available_filename([extracted_file], filename, parent_dir)
+            filename = pft.get_available_filename([extracted_file], filename, parent_dir)
             new_file = abspath(join(parent_dir, f"{filename}{extension}"))
             shutil.move(extracted_file, new_file)
         assert exists(new_file)

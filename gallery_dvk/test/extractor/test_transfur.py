@@ -2,7 +2,7 @@
 
 import os
 import tempfile
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 from gallery_dvk.extractor.transfur import Transfur
 from os.path import abspath, basename, exists, join
 
@@ -110,7 +110,7 @@ def test_archive_contains_all():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "tf.sqlite3"))
         config = {"transfur":{"archive":archive_file}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         assert exists(config_file)
         base = "https://www.transfur.com/Users/"
         with Transfur([config_file]) as transfur:
@@ -218,7 +218,7 @@ def test_get_links_from_gallery():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "transfur.db"))
         config = {"transfur":{"archive":archive_file, "metadata":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Transfur([config_file]) as transfur:
             transfur.initialize()
             transfur.add_to_archive("transfur-angrboda-11122-1")
@@ -249,7 +249,7 @@ def test_download_page():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "transfur.db"))
         config = {"transfur":{"archive":archive_file, "metadata":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with Transfur([config_file]) as transfur:
             transfur.initialize()
             json = {"title":"Unexpected Happiness"}
@@ -274,7 +274,7 @@ def test_download_page():
         assert exists(artist_folder)
         json_file = abspath(join(artist_folder, "17614-1_Bear TF TG.json"))
         assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "Bear TF TG"
         assert meta["artist"] == "Oter"
         assert meta["url"] == f"{base}Oter/Submissions/17614"
@@ -347,7 +347,7 @@ def test_with_login():
             assert exists(artist_folder)
             json_file = abspath(join(artist_folder, "26719-1_Digimon beast.json"))
             assert exists(json_file)
-            meta = mm_file_tools.read_json_file(json_file)
+            meta = pft.read_json_file(json_file)
             assert meta["title"] == "Digimon beast"
             assert meta["artist"] == "Danwolf"
             assert meta["url"] == f"{base}danwolf/submissions/26719"

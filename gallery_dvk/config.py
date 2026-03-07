@@ -4,7 +4,7 @@
 # https://github.com/mikf/gallery-dl
 
 import os
-import metadata_magic.file_tools
+import python_file_tools as pft
 from typing import List
 
 def get_default_config_paths() -> List[str]:
@@ -44,7 +44,7 @@ def get_config(files:List[str]) -> dict:
     """
     for file in files:
         # Attempt to read config file
-        config = metadata_magic.file_tools.read_json_file(os.path.abspath(file))
+        config = pft.read_json_file(os.path.abspath(file))
         if not config == {}:
             return config
     # Return empty dictionary if file couldn't be read

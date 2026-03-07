@@ -2,7 +2,7 @@
 
 import os
 import tempfile
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 from gallery_dvk.gallery_dvk import GalleryDVK
 from gallery_dvk.test.extractor.dummy_extractor import DummyExtractor
 from os.path import abspath, join
@@ -34,7 +34,7 @@ def test_download_from_file():
             +"[URL]"
     with tempfile.TemporaryDirectory() as temp_dir:
         text_file = abspath(join(temp_dir, "links.txt"))
-        mm_file_tools.write_text_file(text_file, text)
+        pft.write_text_file(text_file, text)
         # Attempt to download files from a list of urls in a text file
         with GalleryDVK() as dvk:
             dvk.extractors.insert(0, DummyExtractor([]))

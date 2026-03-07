@@ -2,7 +2,7 @@
 
 import tempfile
 import gallery_dvk.config
-import metadata_magic.file_tools
+import python_file_tools as pft
 from os.path import abspath, exists, join
 
 def test_get_config():
@@ -13,14 +13,14 @@ def test_get_config():
         # Test getting config from valid JSON
         config_file = abspath(join(temp_dir, "config.json"))
         config = {"some":"things", "to":"test"}
-        metadata_magic.file_tools.write_json_file(config_file, config)
+        pft.file_tools.write_json_file(config_file, config)
         assert exists(config_file)
         read_config = gallery_dvk.config.get_config([config_file])
         assert read_config["some"] == "things"
         assert read_config["to"] == "test"
         # Test getting config info with no valid files
         text_file = abspath(join(temp_dir, "text.json"))
-        metadata_magic.file_tools.write_text_file(text_file, "text.txt")
+        pft.write_text_file(text_file, "text.txt")
         assert exists(text_file)
         read_config = gallery_dvk.config.get_config(["non/existant.json", text_file])
         assert read_config == {}
@@ -28,4 +28,3 @@ def test_get_config():
         read_config = gallery_dvk.config.get_config(["non/existant.json", text_file, config_file])
         assert read_config["some"] == "things"
         assert read_config["to"] == "test"
-

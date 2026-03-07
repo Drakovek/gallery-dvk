@@ -6,7 +6,7 @@ import copy
 import math
 import operator
 import gallery_dvk.extractor.extractor
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 from PIL import Image
 from os.path import abspath, exists, join
 from typing import List
@@ -338,7 +338,7 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
             # Save metadata, if applicable
             if self.write_metadata:
                 json_file = abspath(join(parent, f"{filename}.json"))
-                mm_file_tools.write_json_file(json_file, metadata)
+                pft.write_json_file(json_file, metadata)
         # Return the list of media files
         if self.stitch_images and self.only_stitched:
             for i in range(len(media_files)-2, -1, -1):

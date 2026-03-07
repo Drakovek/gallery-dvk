@@ -1,0 +1,9 @@
+beautifulsoup4>=4.14.3
+html5lib>=1.1
+pillow>=8.0.0
+Python-File-Tools>=0.1.0
+requests>=2.31.0
+tqdm>=4.64.1
+Python-Print-Tools>=0.2.2
+Metadata-Magic>=0.15.0
+HTML-String-Tools>=0.4.2

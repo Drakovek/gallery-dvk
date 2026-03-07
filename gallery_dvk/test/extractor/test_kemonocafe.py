@@ -2,7 +2,7 @@
 
 import os
 import tempfile
-import metadata_magic.file_tools as mm_file_tools
+import python_file_tools as pft
 from gallery_dvk.extractor.kemonocafe import KemonoCafe
 from os.path import abspath, basename, exists, join
 
@@ -55,7 +55,7 @@ def test_get_comic_pages():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "kemonocafe.db"))
         config = {"kemonocafe":{"archive":archive_file, "metadata":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with KemonoCafe([config_file]) as kemonocafe:
             # Test getting pages
             pages = kemonocafe.get_comic_pages("paprika")
@@ -181,7 +181,7 @@ def test_download_page():
         config_file = abspath(join(temp_dir, "config.json"))
         archive_file = abspath(join(temp_dir, "kemonocafe.db"))
         config = {"kemonocafe":{"archive":archive_file, "metadata":True}}
-        mm_file_tools.write_json_file(config_file, config)
+        pft.write_json_file(config_file, config)
         with KemonoCafe([config_file]) as kemonocafe:
             kemonocafe.initialize()
             json = {"title":"Page0001"}
@@ -209,7 +209,7 @@ def test_download_page():
         assert exists(chapter_folder)
         json_file = abspath(join(chapter_folder, "addictivescience-page0002.json"))
         assert exists(json_file)
-        meta = mm_file_tools.read_json_file(json_file)
+        meta = pft.read_json_file(json_file)
         assert meta["title"] == "Page0002"
         assert meta["id"] == "addictivescience-page0002"
         assert meta["comic"] == "Addictive Science"
