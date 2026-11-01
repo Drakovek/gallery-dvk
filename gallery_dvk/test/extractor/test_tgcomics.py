@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import time
 import tempfile
 import gallery_dvk.extractor.tgcomics
 import python_file_tools as pft
@@ -106,7 +107,7 @@ def get_categories_test(tgcomics:TGComics):
     bs = tgcomics.web_get("https://tgcomics.com/tgc/comics/angelas-trick-n-treat-2020/")
     info = tgcomics.get_categories(bs)
     assert info["title"] == "Angela’s Tyler’s Trick ’n Treat (2020 Edition)"
-    assert info["artists"] == ["Tyler Adams (TGTrinity)", "NotZackforWork"]
+    assert info["artists"] == ["TGTrinity", "NotZackforWork"]
     assert info["authors"] is None
     assert info["age_rating"] is None
     assert info["genres"] is None

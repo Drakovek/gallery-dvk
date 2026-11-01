@@ -121,6 +121,8 @@ class DocsLab(gallery_dvk.extractor.extractor.Extractor):
         # Get submissions
         submissions = []
         sub_container = bs.find("div", {"id":"submissions"})
+        if sub_container is None:
+            return []
         sub_elements = sub_container.find_all("tr", {"data-href":re.compile(r"submissions\/[0-9]+")})
         for sub_element in sub_elements:
             section = re.findall(self.sub_section, "docs-lab.com" + sub_element["data-href"])[0]

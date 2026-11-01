@@ -86,23 +86,22 @@ def test_get_submission_info():
     """
     # Get story submission with rating provided
     with DocsLab([]) as docslab:
-        page = docslab.get_submission_info("3339/solo-play-ch-01", "FakeRating")
-        assert page["id"] == "3339"
-        assert page["url"] == "https://www.docs-lab.com/submissions/3339/solo-play-ch-01"
-        assert page["title"] == "Solo Play Ch. 01"
-        assert page["artist"] == "lycandope"
-        assert page["date"] == "2021-10-02"
-        assert page["last_edit"] == "2021-10-02"
-        assert len(page["tags"]) == 3
-        assert page["tags"] == ["transformation", "masturbation", "doggirl"]
+        page = docslab.get_submission_info("5466/a-familiar-set-of-stripes", "FakeRating")
+        assert page["id"] == "5466"
+        assert page["url"] == "https://www.docs-lab.com/submissions/5466/a-familiar-set-of-stripes"
+        assert page["title"] == "A Familiar Set Of Stripes"
+        assert page["artist"] == "gabrielmoon"
+        assert page["date"] == "2024-12-13"
+        assert page["last_edit"] == "2024-12-13"
+        assert page["tags"] == ["post transformation", "feline", "female character", "magic", "tiger"]
         assert page["age_rating"] == "FakeRating"
-        assert page["user_rating"] > 90 and page["user_rating"] < 100
-        assert page["favorites"] > 17
+        assert page["user_rating"] > 70 and page["user_rating"] < 100
+        assert page["favorites"] > 7
         assert page["favorites"] < 25
-        assert page["description"] == "A young woman enjoys some time alone with her curse."
-        assert page["text"].startswith("<!DOCTYPE html><html><body><p>\"No, I love")
-        assert "It started with her heartbeat," in page["text"]
-        assert "<em>Soon.</em>" in page["text"]
+        assert page["description"] == "Finding out her best friend is a witch, the idea of becoming her familiar forever becomes too tempting a prospect to pass up, even if the form is a little 'larger' than the witch is expecting..."
+        assert page["text"].startswith("<!DOCTYPE html><html><body><p>Waking to the chirping of birds")
+        assert "“Well, if you were my familiar, I could channel my energy through you" in page["text"]
+        assert "Reaching up to rub her nose as the tingling settled into" in page["text"]
         assert page["text"].endswith("</p></body></html>")
         assert page["image_url"] is None
         assert page["story_link"] is None
@@ -169,13 +168,13 @@ def test_get_links_from_user():
         pft.write_json_file(config_file, config)
         with DocsLab([config_file]) as docslab:
             # Test getting submissions
-            links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
-            assert len(links) > 75
-            assert len(links) < 85
-            assert {"section":"3637/a-close-companion", "rating":"R"} in links
-            assert {"section":"2917/comfort", "rating":"PG"} in links
-            assert {"section":"2862/the-gift-ch-01", "rating":"X"} in links
-            assert {"section":"3474/what-goes-around", "rating":"X"} in links
+            links = docslab.get_links_from_user("gabrielmoon", get_submissions=True, get_favorites=False)
+            assert len(links) > 300
+            assert len(links) < 460
+            assert {"section":"2011/assembly-for-animals", "rating":None} not in links
+            assert {"section":"2096/so-you-want-to-be-a-zebra", "rating":None} not in links
+            assert {"section":"3006/a-canadian-werewolf-in-philly", "rating":"X"} in links
+            assert {"section":"4103/wooing-wilderness-and-wolves", "rating":"X"} in links
             # Test getting favorites
             links = docslab.get_links_from_user("gabrielmoon", get_submissions=False, get_favorites=True)
             assert len(links) > 20
@@ -184,28 +183,29 @@ def test_get_links_from_user():
             assert {"section":"2096/so-you-want-to-be-a-zebra", "rating":None} in links
             assert {"section":"176/stud-mare", "rating":None} in links
             assert {"section":"1649/you-and-your-beef", "rating":None} in links
-            # Test getting favorites
+            # Test getting favorites and submissions
             links = docslab.get_links_from_user("gabrielmoon", get_submissions=True, get_favorites=True)
-            assert len(links) > 350
-            assert len(links) < 400
+            assert len(links) > 400
+            assert len(links) < 500
             assert {"section":"2011/assembly-for-animals", "rating":None} in links
             assert {"section":"2096/so-you-want-to-be-a-zebra", "rating":None} in links
             assert {"section":"176/stud-mare", "rating":None} in links
             assert {"section":"1649/you-and-your-beef", "rating":None} in links
             assert {"section":"3006/a-canadian-werewolf-in-philly", "rating":"X"} in links
             assert {"section":"4103/wooing-wilderness-and-wolves", "rating":"X"} in links
-            # Test not including already downloaded files
-            docslab.add_to_archive("docslab-3637")
-            docslab.add_to_archive("docslab-2917")
-            docslab.add_to_archive("docslab-2862")
+            # Test downloading empty gallery
             links = docslab.get_links_from_user("lycandope", get_submissions=True, get_favorites=False)
-            assert len(links) > 65
-            assert len(links) < 90
-            assert {"section":"3637/a-close-companion", "rating":"R"} not in links
-            assert {"section":"2917/comfort", "rating":"PG"} not in links
-            assert {"section":"2862/the-gift-ch-01", "rating":"X"} not in links
-            assert {"section":"3430/esssssential-oilsssss", "rating":"X"} in links
-            assert {"section":"3474/what-goes-around", "rating":"X"} in links
+            assert links == []
+            # Test not including already downloaded files
+            docslab.add_to_archive("docslab-3006")
+            docslab.add_to_archive("docslab-4103")
+            links = docslab.get_links_from_user("gabrielmoon", get_submissions=True, get_favorites=False)
+            assert len(links) > 390
+            assert len(links) < 460
+            assert {"section":"3006/a-canadian-werewolf-in-philly", "rating":"X"} not in links
+            assert {"section":"4103/wooing-wilderness-and-wolves", "rating":"X"} not in links
+            assert {"section":"6376/a-fuzzy-new-pair-of-slippers", "rating":"X"} in links
+            assert {"section":"5466/a-familiar-set-of-stripes", "rating":"PG"} in links
 
 def test_download_page():
     """

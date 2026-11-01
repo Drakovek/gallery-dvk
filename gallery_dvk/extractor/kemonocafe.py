@@ -3,6 +3,7 @@
 import re
 import operator
 import gallery_dvk.extractor.extractor
+import python_file_tools as pft
 from typing import List
 
 class KemonoCafe(gallery_dvk.extractor.extractor.Extractor):
@@ -126,6 +127,7 @@ class KemonoCafe(gallery_dvk.extractor.extractor.Extractor):
             # Get chapter title and description
             title = container.find("h3", {"class":"comic-archive-chapter"}).get_text()
             description = container.find("div", {"class":"comic-archive-chapter-description"}).get_text()
+            description = description.strip()
             if description == "":
                 description = None
             # Get chapter date
@@ -137,6 +139,7 @@ class KemonoCafe(gallery_dvk.extractor.extractor.Extractor):
             for link_container in link_containers:
                 page_section = re.findall(self.sub_section, link_container["href"])[0]
                 links.append(page_section)
+            links = pft.sort.sort_alphanum(links)
             # Add chapter info
             chapters.append({"title":title, "date":date, "description":description, "links":links})
         # Return chapters

@@ -7,7 +7,6 @@ import python_print_tools.printer
 import python_file_tools as pft
 from gallery_dvk.extractor.docslab import DocsLab
 from gallery_dvk.extractor.kemonocafe import KemonoCafe
-from gallery_dvk.extractor.overflowingbra import OverflowingBra
 from gallery_dvk.extractor.tgcomics import TGComics
 from gallery_dvk.extractor.transfur import Transfur
 from gallery_dvk.extractor.webtoon import Webtoon
@@ -25,7 +24,7 @@ class GalleryDVK():
         Setup for when GallerDVK is opened.
         Create an object for each Extractor.
         """
-        self.extractors = [DocsLab(), KemonoCafe(), OverflowingBra(), Transfur(), TGComics(), Webtoon()]
+        self.extractors = [DocsLab(), KemonoCafe(), Transfur(), TGComics(), Webtoon()]
         return self
         
     def __exit__(self, *args):

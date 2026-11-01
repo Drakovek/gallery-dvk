@@ -475,8 +475,17 @@ class TGComics(gd_extractor.Extractor):
         :rtype: bool
         """
         # Load the login page to get request verification cookies
-        bs = self.web_get("https://tgcomics.com/tgc/")
-        input_element = bs.find("input", {"name":"_amember_redirect_url"})    
+        input_element = None
+        for i in range(0,3):
+            try:
+                bs = self.web_get("https://tgcomics.com/tgc/")
+                input_element = bs.find("input", {"name":"_amember_redirect_url"})
+                assert input_element is not None
+                break
+            except (AssertionError, TypeError):
+                input_element = None
+                time.sleep(5)
+                continue
         # Attempt login
         request = dict()
         request["amember_login"] = username

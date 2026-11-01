@@ -86,28 +86,41 @@ def test_get_chapter_info():
     """
     with KemonoCafe([]) as kemonocafe:
         chapters = kemonocafe.get_chapter_info("paprika")
-        assert len(chapters) == 4
+        assert len(chapters) == 5
         assert chapters[0]["title"] == "Paprika!"
-        desc = "Welcome to Paprika, a celebration of creativity and the power of "\
-                    +"imagination! Follow Tina Hachi as she attends her very first "\
-                    +"anime convention and meets her lifelong friends. Be careful, "\
-                    +"though Nekomimi have very powerful imaginations and if you're "\
-                    +"swept up in them... there's no telling where you'll end up."
+        desc = "Welcome to Paprika, a celebration of creativity and the power of imagination! "\
+                +"Follow Tina Hachi as she attends her very first anime convention and meets her "\
+                +"lifelong friends. Be careful, though. Nekomimi have very powerful imaginations, "\
+                +"and if you're swept up in them... there's no telling where you'll end up."
         assert chapters[0]["description"] == desc
         assert chapters[0]["date"] == "2017-01-01"
-        assert chapters[0]["links"] == ["paprika.kemono.cafe/comic/page000"]
-        assert chapters[1]["title"] == "Nekomimi"
-        assert chapters[1]["date"] == "2017-01-20"
-        assert chapters[1]["links"] == ["paprika.kemono.cafe/comic/page019"]
+        assert len(chapters[0]["links"]) == 22
+        assert chapters[0]["links"][0] == "paprika.kemono.cafe/comic/page000"
+        assert chapters[0]["links"][21] == "paprika.kemono.cafe/comic/page021"
+        assert chapters[1]["title"] == "Nekomimi!"
+        assert chapters[1]["date"] == "2017-01-23"
+        assert len(chapters[1]["links"]) == 38
+        assert chapters[1]["links"][0] == "paprika.kemono.cafe/comic/page022"
+        assert chapters[1]["links"][37] == "paprika.kemono.cafe/comic/page059"
         assert "Now with Yuki and Ruby on her side" in chapters[1]["description"]
-        assert chapters[2]["title"] == "Tiger Special"
+        assert chapters[2]["title"] == "The Tiger Special!"
         assert chapters[2]["date"] == "2017-03-02"
-        assert chapters[2]["links"] == ["paprika.kemono.cafe/comic/page060"]
+        assert len(chapters[2]["links"]) == 24
+        assert chapters[2]["links"][0] == "paprika.kemono.cafe/comic/page060"
+        assert chapters[2]["links"][23] == "paprika.kemono.cafe/comic/page083"
         assert "Tina can't help but" in chapters[2]["description"]
-        assert chapters[3]["title"] == "Animeko"
-        assert chapters[3]["date"] == "2017-04-17"
-        assert chapters[3]["links"] == ["paprika.kemono.cafe/comic/page105"]
+        assert chapters[3]["title"] == "Oops, It's Nekonny!"
+        assert chapters[3]["date"] == "2017-03-27"
+        assert len(chapters[3]["links"]) == 38
+        assert chapters[3]["links"][0] == "paprika.kemono.cafe/comic/page084"
+        assert chapters[3]["links"][37] == "paprika.kemono.cafe/comic/page-121-the-first-night"
         assert "Even in small doses, the" in chapters[3]["description"]
+        assert chapters[4]["title"] == "Cool Fusion"
+        assert chapters[4]["date"] == "2020-09-28"
+        assert len(chapters[4]["links"]) == 8
+        assert chapters[4]["links"][0] == "paprika.kemono.cafe/comic/page-122-iron-neko"
+        assert chapters[4]["links"][7] == "paprika.kemono.cafe/comic/page-129-what-year-is-it"
+        assert "When her latest university experiment" in chapters[4]["description"]
         # Test getting chapter info for chapters with multiple links
         chapters = kemonocafe.get_chapter_info("addictivescience")
         assert len(chapters) > 105

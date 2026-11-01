@@ -141,15 +141,15 @@ def test_get_episodes():
         assert episodes[0]["date"] == "2023-02-28"
         assert episodes[0]["likes"] > 2800
         assert episodes[0]["likes"] < 3500
-        assert episodes[0]["url"] == "https://www.webtoons.com/en/canvas/a-kats-god-awful-blessing/prologue/viewer?title_no=847082&episode_no=1"
+        assert episodes[0]["url"] == "https://www.webtoons.com/en/canvas/a-kats-god-awful-blessing/prologue/viewer?title_no=847082&episode_no=1&readingLanguageCode=en"
         # Test getting episodes with unique titles
         episodes = webtoon.get_episodes("en/romance/blades-of-furry/list?title_no=2383")
         assert len(episodes) > 61
         assert episodes[0]["webtoon"] == "Blades of Furry"
         assert episodes[0]["genre"] == "Romance"
         assert episodes[0]["authors"] == ["Deya Muniz", "Emily Erdos"]
-        assert episodes[0]["webtoon_views"] > 38000000
-        assert episodes[0]["webtoon_views"] < 50000000
+        assert episodes[0]["webtoon_views"] > 50000000
+        assert episodes[0]["webtoon_views"] < 70000000
         assert episodes[0]["webtoon_subscribers"] > 550000
         assert episodes[0]["webtoon_subscribers"] < 650000
         assert episodes[0]["webtoon_summary"].startswith("Emile is an up-and-coming skater in the")

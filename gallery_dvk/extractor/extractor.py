@@ -378,8 +378,9 @@ class Extractor:
         """
         # Set the Session object
         if self.requests_session is None:
-            headers = {"User-Agent":"Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",
-                        "Accept-Language":"en-US,en;q=0.5"}
+            headers = {"User-Agent":"Mozilla/5.0 (X11; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0",
+                        "Accept-Language":"en-US,en;q=0.5",
+                        "Accept-Encoding": "gzip, deflate, zstd"}
             self.requests_session = requests.Session()
             self.requests_session.headers.update(headers)
         # Open database
