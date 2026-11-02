@@ -36,7 +36,7 @@ def get_cover_page(collection_page:dict) -> dict:
     return image_page
 
 class TGComics(gd_extractor.Extractor):
-    def __init__(self, config_paths:List[str]=gallery_dvk.config.get_default_config_paths()):
+    def __init__(self, config_paths:List[str]=gallery_dvk.config.get_default_config_paths(), advanced_spoofing=True):
         """
         Creates the TGComics object and loads configuration files.
         

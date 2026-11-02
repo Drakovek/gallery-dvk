@@ -61,13 +61,13 @@ class Webtoon(gallery_dvk.extractor.extractor.Extractor):
         if self.filename_format == "{title}":
             self.filename_format = "{id}_{title}"
     
-    def initialize(self):
+    def initialize(self, advanced_spoof:bool=False):
         """
         Initializes the requests session and sqlite archive database.
         Does nothing if objects are already created.
         """
         # Do the default extractor initialize
-        super().initialize()
+        super().initialize(self.advanced_spoof)
         # Set the headers to use webtoons.com as a referer
         headers = self.requests_session.headers.update({"Referer":"https://www.webtoons.com/"})
     

@@ -9,7 +9,8 @@ import shutil
 import urllib
 import getpass
 import sqlite3
-import requests
+import requests as python_requests
+from curl_cffi import requests as curl_cffi_requests
 import gallery_dvk.config
 import html_string_tools
 import python_print_tools.printer
@@ -189,7 +190,7 @@ def get_element_with_string(elements, string, children:bool=False) -> bs4.Beauti
     return None
 
 class Extractor:
-    def __init__(self, category:str, config_paths:List[str]=gallery_dvk.config.get_default_config_paths()):
+    def __init__(self, category:str, config_paths:List[str]=gallery_dvk.config.get_default_config_paths(), advanced_spoof:bool=False):
         """
         Creates the Extractor object and loads configuration files.
         
@@ -197,6 +198,8 @@ class Extractor:
         :type category: str, required
         :param config_paths: Paths to attempt to read as a configuration file, defaults to default config paths
         :type config_paths: list[str]
+        :param advanced_spoof: Whether to use advanced spoofing with curl-cffi, defaults to False
+        :type advanced_spoof: bool, required
         """
         # Set the URL matchers
         self.url_matchers = []
@@ -213,6 +216,8 @@ class Extractor:
         # Load the config file
         config = gallery_dvk.config.get_config(config_paths)
         self.get_info_from_config(config, category)
+        # Set advanced spoofing
+        self.advanced_spoof = advanced_spoof
         # Set the extractor so that login has not been attempted
         self.attempted_login = False
     
@@ -371,18 +376,24 @@ class Extractor:
         except AttributeError:
             return False
     
-    def initialize(self):
+    def initialize(self, advanced_spoof:bool=False):
         """
         Initializes the requests session and sqlite archive database.
         Does nothing if objects are already created.
+
+        :param advanced_spoof: Whether to use advanced spoofing with curl-cffi, defaults to False
+        :type advanced_spoof: bool, required
         """
         # Set the Session object
         if self.requests_session is None:
-            headers = {"User-Agent":"Mozilla/5.0 (X11; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0",
-                        "Accept-Language":"en-US,en;q=0.5",
-                        "Accept-Encoding": "gzip, deflate, zstd"}
-            self.requests_session = requests.Session()
-            self.requests_session.headers.update(headers)
+            if not advanced_spoof:
+                headers = {"User-Agent":"Mozilla/5.0 (X11; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0",
+                    "Accept-Language":"en-US,en;q=0.5",
+                    "Accept-Encoding": "gzip, deflate, zstd"}
+                self.requests_session = python_requests.Session()
+                self.requests_session.headers.update(headers)
+            else:
+                self.requests_session = curl_cffi_requests.Session(impersonate="firefox")
         # Open database
         if self.archive_connection is None:
             self.open_archive()
@@ -413,7 +424,7 @@ class Extractor:
         """
         self.dict_to_header(self.requests_session.cookies.get_dict(), "Cookie")
         
-    def web_get_response(self, url:str) -> requests.Response:
+    def web_get_response(self, url:str) -> python_requests.Response:
         """
         Returns a Response object for the response of a GET request on a given URL.
         Retries the request if the initial request fails.
@@ -423,7 +434,7 @@ class Extractor:
         :return: Response object from the response
         :rtype: requests.Response
         """
-        self.initialize()
+        self.initialize(self.advanced_spoof)
         # Attempt loading the URL
         for i in range(0, 3):
             time.sleep(self.webpage_sleep)
@@ -484,7 +495,7 @@ class Extractor:
         :rtype: dict
         """
         try:
-            self.initialize()
+            self.initialize(self.advanced_spoof)
             file = abspath(file_path)
             response = self.requests_session.get(url)
             byte_obj = io.BytesIO(response.content)
@@ -495,8 +506,11 @@ class Extractor:
             return response.headers
         except (AttributeError,
                     urllib.error.HTTPError,
-                    requests.exceptions.ConnectionError,
-                    requests.exceptions.MissingSchema,
+                    curl_cffi_requests.exceptions.DNSError,
+                    curl_cffi_requests.exceptions.ConnectionError,
+                    curl_cffi_requests.exceptions.MissingSchema,
+                    python_requests.exceptions.ConnectionError,
+                    python_requests.exceptions.MissingSchema,
                     ConnectionResetError,
                     TypeError):
             if url is not None:
@@ -521,7 +535,7 @@ class Extractor:
         :rtype: str
         """
         # Check if the page is already downloaded
-        self.initialize()
+        self.initialize(self.advanced_spoof)
         identifier = self.get_id(page["url"])
         identifier = f"{identifier}{id_append}"
         if self.archive_contains(identifier):

@@ -469,6 +469,17 @@ def test_web_get():
         assert "Lorem ipsum dolor" in element
         assert "sed do eiusmod tempor" in element
         assert "id est laborum." in element
+        user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0"
+        assert extractor.requests_session.headers["User-Agent"] == user_agent
+    with Extractor("thing", [], advanced_spoof=True) as extractor:
+        bs = extractor.web_get("https://pythonscraping.com/exercises/exercise1.html")
+        element = bs.find("h1").get_text()
+        assert element == "An Interesting Title"
+        element = bs.find("div").get_text()
+        assert "Lorem ipsum dolor" in element
+        assert "sed do eiusmod tempor" in element
+        assert "id est laborum." in element
+        assert extractor.requests_session.headers == {}
 
 def test_download():
     """
@@ -476,14 +487,39 @@ def test_download():
     """
     with tempfile.TemporaryDirectory() as temp_dir:
         with Extractor("thing", []) as extractor:
+            assert not extractor.advanced_spoof
             # Test downloading a given file
             file = abspath(join(temp_dir, "image.jpg"))
             url = "https://www.pythonscraping.com/img/gifts/img6.jpg"
             extractor.download(url, file)
             assert exists(file)
             assert os.stat(file).st_size == 39785
+            assert extractor.requests_session is not None
+            user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0"
+            assert extractor.requests_session.headers["User-Agent"] == user_agent
             # Test downloading with invalid parameters
             file = join(temp_dir, "invalid.jpg")
+            extractor.download(None, None)
+            assert not exists(file)
+            extractor.download(None, file)
+            assert not exists(file)
+            extractor.download("asdfasdf", file)
+            assert not exists(file)
+            extractor.download(url, None)
+            assert not exists(file)
+        with Extractor("thing", [], advanced_spoof=True) as extractor:
+            # Test downloading with advanced_spoof option
+            assert extractor.advanced_spoof
+            # Test downloading a given file
+            file = abspath(join(temp_dir, "new_image.jpg"))
+            url = "https://www.pythonscraping.com/img/gifts/img5.jpg"
+            extractor.download(url, file)
+            assert exists(file)
+            assert os.stat(file).st_size == 33362
+            assert extractor.requests_session is not None
+            assert extractor.requests_session.headers == {}
+            # Test downloading with invalid parameters
+            file = join(temp_dir, "new_invalid.jpg")
             extractor.download(None, None)
             assert not exists(file)
             extractor.download(None, file)
@@ -624,3 +660,20 @@ def test_download_page():
         json_file = abspath(join(sub, "No Meta.json"))
         assert not exists(json_file)
         assert os.stat(media_file).st_size == 58424
+        # Test downloading with advanced spoofing
+        config = {"thing":{"archive":archive_file, "metadata":True}}
+        pft.write_json_file(config_file, config)
+        page = {"title":"New Gift", "url": "https://www.pythonscraping.com/img/gifts/img5.jpg"}
+        with Extractor("thing", [config_file], advanced_spoof=True) as extractor:
+            media_file = extractor.download_page(page, temp_dir)
+            assert basename(media_file) == "New Gift.jpg"
+            assert exists(media_file)
+            assert extractor.archive_contains("https://www.pythonscraping.com/img/gifts/img5.jpg")
+            assert extractor.requests_session.headers == {}
+        json_file = abspath(join(temp_dir, "New Gift.json"))
+        assert exists(json_file)
+        assert os.stat(media_file).st_size == 33362
+        meta = pft.read_json_file(json_file)
+        assert meta["title"] == "New Gift"
+        assert meta["url"] == "https://www.pythonscraping.com/img/gifts/img5.jpg"
+        assert meta["date"] == "2014-08-04"
